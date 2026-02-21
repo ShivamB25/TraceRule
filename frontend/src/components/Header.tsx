@@ -42,9 +42,9 @@ export default function Header({
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white">
-              TraceRule <span className="font-normal text-slate-400">Compliance Engine</span>
+              TraceRule <span className="font-normal text-slate-400">Data Policy Compliance Agent</span>
             </h1>
-            <p className="text-xs text-slate-500">Upload policies. Compile rules. Detect violations. Zero LLM at scan time.</p>
+            <p className="text-xs text-slate-500">Upload policy PDFs. Approve SQL checks. Detect violations in company data with deterministic scans.</p>
           </div>
         </div>
 

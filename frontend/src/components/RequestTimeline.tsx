@@ -31,8 +31,8 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">Live Request Timeline</h2>
-          <p className="text-xs text-slate-500">Frontend actions and backend API lifecycle in real time.</p>
+          <h2 className="text-lg font-semibold text-white">Compliance Lifecycle Timeline</h2>
+          <p className="text-xs text-slate-500">Live trace of policy ingestion, approval actions, scan execution, and violation enrichment.</p>
         </div>
         <button
           type="button"

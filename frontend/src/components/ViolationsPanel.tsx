@@ -30,7 +30,7 @@ export default function ViolationsPanel({
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500">Scan results — SQL executed against the transactions database. Zero LLM.</p>
+        <p className="text-xs text-slate-500">Scan results from deterministic SQL checks executed against your `transactions` and related data tables.</p>
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-2 text-xs text-slate-400">
             Status

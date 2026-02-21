@@ -34,7 +34,7 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Policy Document</h2>
-          <p className="text-xs text-slate-500">Upload a compliance policy. AI compiles it into executable SQL rules.</p>
+          <p className="text-xs text-slate-500">Upload an AML, privacy, or internal policy PDF. The agent compiles clauses into SQL checks.</p>
         </div>
         <div className="hidden items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400 sm:inline-flex">
           <Sparkles className="h-3.5 w-3.5 text-blue-400" />
@@ -74,7 +74,7 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
           <>
             <Upload className="h-10 w-10 text-slate-500" />
             <p className="text-sm text-slate-300">Drop a compliance policy PDF</p>
-            <p className="text-xs text-slate-500">or click to browse — AML, GDPR, internal governance, any policy</p>
+            <p className="text-xs text-slate-500">or click to browse: AML, GDPR, internal governance, HR, or custom policy</p>
           </>
         )}
 

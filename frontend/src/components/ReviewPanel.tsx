@@ -31,7 +31,7 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-white">Human-in-the-Loop Review</h2>
-        <p className="text-xs text-slate-500">Each SQL rule must be approved before it can scan. Audit every query.</p>
+        <p className="text-xs text-slate-500">This is the enforcement gate. Approve only rules you are ready to run against production-style data.</p>
       </div>
 
       <div role="tablist" aria-label="Rule status tabs" className="mb-6 flex gap-1 border-b border-slate-700">
