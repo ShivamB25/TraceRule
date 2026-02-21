@@ -8,7 +8,7 @@ Deterministic AI compliance compiler. Upload a policy PDF, get PostgreSQL querie
 2. **Review** the generated SQL → approve or reject each rule
 3. **Scan** runs on a schedule → executes approved queries, flags violations
 
-The LLM is only involved during step 1. Steps 2 and 3 are pure SQL — deterministic, auditable, zero hallucinations.
+The LLM is only involved during step 1. Steps 2 and 3 are pure SQL, deterministic and auditable.
 
 ## Stack
 
@@ -32,6 +32,23 @@ uv run uvicorn app.main:app --reload
 ```
 
 API docs at [http://localhost:8000/docs](http://localhost:8000/docs)
+
+## Docker Compose
+
+```bash
+cp .env.example .env
+
+# Recommended: export key in shell so it is not stored in .env
+export ANTHROPIC_API_KEY=your_new_key_here
+
+docker compose up --build
+```
+
+Notes:
+- Compose supports both exported env vars and `.env` values.
+- `ANTHROPIC_API_KEY` can come from either shell export or `.env`.
+- App container uses internal DB host `db` by default via `DOCKER_DATABASE_URL`.
+- API: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## API
 
