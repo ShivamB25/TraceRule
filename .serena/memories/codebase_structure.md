@@ -34,3 +34,29 @@ Only info NOT already in AGENTS.md lives here.
 - Build stage: `ghcr.io/astral-sh/uv:python3.13-bookworm-slim` with cache mounts
 - Runtime stage: `python:3.13-slim-bookworm`, non-root user, no uv in final image
 - CMD runs `uvicorn` directly (not via `uv run`)
+
+
+## Recent additions (2026-02-22)
+
+### Scripts directory
+- `scripts/reset_db.py` — repeatable DB reset utility
+  - default: truncates `policies`, `rules`, `violations`
+  - `--all-public`: truncates all public schema tables
+- `scripts/extract_aml_demo.py` — capped extraction from IBM AML zip without full unzip
+  - profiles: `tiny`, `small`
+  - budget control: `--budget-gb`
+  - writes `data/aml_demo/manifest.json`
+- `scripts/load_aml_demo_to_db.py` — loader for extracted AML CSVs into Postgres
+  - creates `transactions` and `accounts` tables if missing
+  - batched inserts + unique `(source_file, source_row_number)`
+  - supports `--max-trans-rows`, `--max-account-rows`, `--no-truncate`
+
+### Frontend flow improvements
+- `frontend/src/components/RequestTimeline.tsx` — separate live timeline panel for request lifecycle
+  - includes optional Technical Mode to show request/response endpoint lines
+- `frontend/src/components/ViolationsPanel.tsx` + `frontend/src/api.ts`
+  - violations filtering now uses backend query params (`rule_id`, `status`)
+- `frontend/src/App.tsx`
+  - unified refresh path, manual refresh, last-updated indicator
+  - upload polling timeout guard
+  - timeline events for upload/compile/review/scan/explanation lifecycle

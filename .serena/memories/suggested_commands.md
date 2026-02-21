@@ -45,3 +45,26 @@ docker compose up --build
 cp .env.example .env
 # Set ANTHROPIC_API_KEY in .env
 ```
+
+
+## Demo data utilities (2026-02-22)
+```bash
+# Extract capped subset from 8GB AML zip (~1.1GB output)
+uv run python scripts/extract_aml_demo.py --profile small --budget-gb 1.5
+
+# Load AML demo CSVs into Postgres (creates transactions/accounts tables)
+uv run python scripts/load_aml_demo_to_db.py
+
+# Load smaller sample for quick iteration
+uv run python scripts/load_aml_demo_to_db.py --max-trans-rows 50000 --max-account-rows 50000
+
+# Reset only internal app tables (policies/rules/violations)
+uv run python scripts/reset_db.py --yes
+
+# Reset all public tables (including employees/transactions/accounts)
+uv run python scripts/reset_db.py --all-public --yes
+
+# Verify extracted subset size
+du -sh data/aml_demo
+ls -lh data/aml_demo
+```

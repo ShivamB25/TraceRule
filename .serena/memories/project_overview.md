@@ -35,3 +35,10 @@ Full end-to-end pipeline verified with live Anthropic API:
 ## Forbidden
 
 LangChain, LangGraph, Instructor, Celery, Redis, Docling, Alembic.
+
+
+## Recent updates (2026-02-22)
+
+- Upload/ingestion policy consistency fix: background ingestion now uses the same `policy_id` created by upload route (no duplicate policy row for one upload).
+- Frontend now includes a dedicated live request timeline panel with endpoint-level technical trace mode.
+- Demo data workflow no longer requires full AML unzip; capped extraction + loader scripts support 1-2GB demo footprint.
