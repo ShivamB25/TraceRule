@@ -38,7 +38,7 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
 
       <div className="mb-4">
         <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
-          Source Quote
+          Policy Source
         </p>
         <blockquote className="rounded-r-md border-l-2 border-blue-500 bg-slate-900/70 py-2 pl-4 text-sm italic text-slate-300">
           {rule.source_quote}
@@ -62,7 +62,7 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
               : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
           }`}
         >
-          {rule.is_deterministic ? 'Deterministic' : 'Subjective'}
+          {rule.is_deterministic ? 'Deterministic' : 'Requires Human Judgment'}
         </span>
       </div>
 

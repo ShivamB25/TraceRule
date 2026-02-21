@@ -31,9 +31,9 @@ export default function Header({ scanning, lastScanCount, onScan, approvedCount 
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white">
-              TraceRule <span className="font-normal text-slate-400">BRD Agent</span>
+              TraceRule <span className="font-normal text-slate-400">Compliance Engine</span>
             </h1>
-            <p className="text-xs text-slate-500">Noise in, signal out. Human-reviewed requirements.</p>
+            <p className="text-xs text-slate-500">Upload policies. Compile rules. Detect violations. Zero LLM at scan time.</p>
           </div>
         </div>
 

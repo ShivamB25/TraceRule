@@ -3,7 +3,9 @@ import { AlertCircle } from 'lucide-react'
 import type { Rule, Violation, PolicyUploadResponse } from './types'
 import { uploadPolicy, getRules, approveRule, rejectRule, getViolations, triggerScan } from './api'
 import Header from './components/Header'
+import PipelineStrip from './components/PipelineStrip'
 import UploadPanel from './components/UploadPanel'
+import StatsBar from './components/StatsBar'
 import ReviewPanel from './components/ReviewPanel'
 import ViolationsPanel from './components/ViolationsPanel'
 
@@ -96,7 +98,7 @@ export default function App() {
       const updated = await approveRule(id)
       setRules((prev) => prev.map((r) => (r.id === id ? updated : r)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to approve requirement')
+      setError(err instanceof Error ? err.message : 'Failed to approve rule')
     }
   }, [])
 
@@ -106,7 +108,7 @@ export default function App() {
       const updated = await rejectRule(id)
       setRules((prev) => prev.map((r) => (r.id === id ? updated : r)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reject requirement')
+      setError(err instanceof Error ? err.message : 'Failed to reject rule')
     }
   }, [])
 
@@ -147,11 +149,20 @@ export default function App() {
           </div>
         )}
 
+        <PipelineStrip />
+
         <UploadPanel
           uploading={uploading}
           lastUpload={lastUpload}
           extractedCount={extractedCount}
           onUpload={handleUpload}
+        />
+
+        <StatsBar
+          totalRules={rules.length}
+          approvedRules={rules.filter(r => r.status === 'approved').length}
+          pendingRules={rules.filter(r => r.status === 'pending_review').length}
+          totalViolations={violations.length}
         />
 
         <ReviewPanel

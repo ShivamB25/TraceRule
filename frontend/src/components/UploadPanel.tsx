@@ -33,12 +33,12 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">Source Document</h2>
-          <p className="text-xs text-slate-500">Upload one noisy artifact. We extract clear requirements.</p>
+          <h2 className="text-lg font-semibold text-white">Policy Document</h2>
+          <p className="text-xs text-slate-500">Upload a compliance policy. AI compiles it into executable SQL rules.</p>
         </div>
         <div className="hidden items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400 sm:inline-flex">
           <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-          PDF live, CSV/TXT soon
+          PDF supported
         </div>
       </div>
 
@@ -58,14 +58,14 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
           <>
             <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
             <p className="text-sm text-slate-300">
-              {uploading ? `Uploading ${lastUpload?.filename ?? 'file'}...` : 'Extracting requirements...'}
+              {uploading ? `Uploading ${lastUpload?.filename ?? 'file'}...` : 'Compiling policy into SQL rules...'}
             </p>
           </>
         ) : isDone ? (
           <>
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
             <p className="text-sm text-emerald-400">
-              Extracted {extractedCount} requirement{extractedCount !== 1 ? 's' : ''} from{' '}
+              Compiled {extractedCount} rule{extractedCount !== 1 ? 's' : ''} from{' '}
               <span className="font-medium text-white">{lastUpload?.filename}</span>
             </p>
             <p className="text-xs text-slate-500">Drop another PDF to continue</p>
@@ -73,8 +73,8 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
         ) : (
           <>
             <Upload className="h-10 w-10 text-slate-500" />
-            <p className="text-sm text-slate-300">Drop a PDF here</p>
-            <p className="text-xs text-slate-500">or click to browse your files</p>
+            <p className="text-sm text-slate-300">Drop a compliance policy PDF</p>
+            <p className="text-xs text-slate-500">or click to browse — AML, GDPR, internal governance, any policy</p>
           </>
         )}
 
@@ -91,7 +91,7 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
         <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
           <FileText className="h-3.5 w-3.5" />
           <span>
-            {lastUpload.filename} - {isDone ? `${extractedCount} requirements extracted` : 'processing'}
+            {lastUpload.filename} - {isDone ? `${extractedCount} rules compiled` : 'processing'}
           </span>
         </div>
       )}

@@ -30,11 +30,11 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
   return (
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-white">Human Review Queue</h2>
-        <p className="text-xs text-slate-500">Approve what is precise. Reject what is unclear.</p>
+        <h2 className="text-lg font-semibold text-white">Human-in-the-Loop Review</h2>
+        <p className="text-xs text-slate-500">Each SQL rule must be approved before it can scan. Audit every query.</p>
       </div>
 
-      <div role="tablist" aria-label="Requirement status tabs" className="mb-6 flex gap-1 border-b border-slate-700">
+      <div role="tablist" aria-label="Rule status tabs" className="mb-6 flex gap-1 border-b border-slate-700">
         {tabs.map(({ status, label, icon: Icon }) => (
           <button
             key={status}
@@ -65,7 +65,7 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-slate-700 py-12 text-slate-500">
             <ClipboardList className="h-8 w-8" />
-            <p className="text-sm">No {activeTab.replace('_', ' ')} requirements right now</p>
+            <p className="text-sm">No {activeTab.replace('_', ' ')} rules right now</p>
           </div>
         ) : (
           filtered.map((rule) => (
