@@ -324,7 +324,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-slate-950 text-white">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_10%,rgba(37,99,235,0.28),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(14,116,144,0.2),transparent_35%),linear-gradient(180deg,#020617_0%,#0b1220_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_10%,rgba(37,99,235,0.15),transparent_38%),radial-gradient(circle_at_82%_18%,rgba(14,116,144,0.12),transparent_35%),linear-gradient(180deg,#020617_0%,#0b1220_100%)]" />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-slate-800 focus:px-3 focus:py-2 focus:text-sm focus:text-white focus:ring-2 focus:ring-blue-400"

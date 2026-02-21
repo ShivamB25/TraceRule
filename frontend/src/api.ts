@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import {
   policyUploadResponseSchema,
   ruleSchema,
@@ -17,8 +18,22 @@ import type {
 const BASE = '/api/v1'
 
 async function parseJsonResponse<T>(res: Response, parser: (data: unknown) => T): Promise<T> {
-  const data: unknown = await res.json()
-  return parser(data)
+  let data: unknown
+  try {
+    data = await res.json()
+  } catch (err) {
+    throw new Error(`Invalid JSON response: ${err instanceof Error ? err.message : 'Unknown error'}`)
+  }
+
+  try {
+    return parser(data)
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const issues = err.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
+      throw new Error(`Response validation failed: ${issues}`)
+    }
+    throw err
+  }
 }
 
 /**

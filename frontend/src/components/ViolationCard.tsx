@@ -9,7 +9,8 @@ export default function ViolationCard({ violation, rules }: ViolationCardProps) 
   const rule = rules.find((r) => r.id === violation.rule_id)
 
   return (
-    <article className="rounded-lg border-l-4 border-red-500 bg-slate-800/90 p-5 shadow-[0_20px_40px_-35px_rgba(15,23,42,1)]">
+    <article className="group relative overflow-hidden rounded-xl border border-slate-700/60 border-l-4 border-l-red-500/80 bg-slate-800/60 p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:border-slate-600 hover:bg-slate-800/90 hover:shadow-[var(--shadow-panel)]">
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="mb-3">
         <h3 className="text-sm font-medium text-white">
           Rule: {rule?.title ?? `#${violation.rule_id}`}

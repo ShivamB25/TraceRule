@@ -28,7 +28,7 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
   const [technicalMode, setTechnicalMode] = useState(false)
 
   return (
-    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
+    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Compliance Lifecycle Timeline</h2>
@@ -38,7 +38,7 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
           type="button"
           onClick={() => setTechnicalMode((prev) => !prev)}
           aria-pressed={technicalMode}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium outline-none transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium outline-none transition-colors focus-visible:ring-4 focus-visible:ring-blue-500/50 ${
             technicalMode
               ? 'border-blue-500/40 bg-blue-500/15 text-blue-300'
               : 'border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700'

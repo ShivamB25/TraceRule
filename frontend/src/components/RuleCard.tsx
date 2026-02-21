@@ -27,7 +27,7 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
 
   return (
     <article
-      className={`rounded-lg border border-slate-700 bg-slate-800/90 p-6 shadow-[0_20px_40px_-35px_rgba(15,23,42,1)] transition-all duration-300 hover:border-slate-600 ${
+      className={`rounded-lg border border-slate-700 bg-slate-800/90 p-6 shadow-[var(--shadow-card)] transition-all duration-300 hover:border-slate-600 ${
         exiting ? 'translate-y-2 opacity-0' : ''
       }`}
     >

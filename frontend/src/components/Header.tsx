@@ -73,7 +73,7 @@ export default function Header({
             disabled={scanning || approvedCount === 0}
             aria-busy={scanning}
             aria-label={scanning ? 'Running deterministic scan' : 'Trigger deterministic scan'}
-            className="flex min-h-11 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_-12px_rgba(59,130,246,0.7)] outline-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-11 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-[var(--shadow-button)] outline-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {scanning ? (
               <Loader2 className="h-4 w-4 animate-spin" />

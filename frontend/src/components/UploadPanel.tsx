@@ -41,7 +41,7 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
   const isDone = lastUpload?.status === 'completed'
 
   return (
-    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
+    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Policy Document</h2>

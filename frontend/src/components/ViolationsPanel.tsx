@@ -22,7 +22,7 @@ export default function ViolationsPanel({
   loading,
 }: ViolationsPanelProps) {
   return (
-    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
+    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
       <div className="mb-4 space-y-3">
         <div className="mb-1 flex items-center gap-3">
           <h2 className="text-lg font-semibold text-white">Detected Violations</h2>

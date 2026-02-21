@@ -29,7 +29,7 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
   const filtered = rules.filter((r) => r.status === activeTab)
 
   return (
-    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
+    <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-white">Human-in-the-Loop Review</h2>
         <p className="text-xs text-slate-500">This is the enforcement gate. Approve only rules you are ready to run against production-style data.</p>
@@ -74,10 +74,14 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
             </div>
           ))
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-slate-700 py-12 text-slate-500">
-            <ClipboardList className="h-8 w-8" />
-            <p className="text-sm">No {activeTab.replace('_', ' ')} rules right now</p>
-            <p className="text-xs text-slate-400">Upload a policy to generate rules, then review here.</p>
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-800/80 bg-gradient-to-b from-slate-800/20 to-transparent py-16 text-slate-500">
+            <div className="rounded-full bg-slate-800/50 p-3 shadow-inner">
+              <ClipboardList className="h-6 w-6 text-slate-400" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-slate-300">No {activeTab.replace('_', ' ')} rules right now</p>
+              <p className="mt-1 text-xs text-slate-500">Upload a policy to generate rules, then review here.</p>
+            </div>
           </div>
         ) : (
           filtered.map((rule, index) => (
