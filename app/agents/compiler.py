@@ -2,8 +2,10 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.models.anthropic import AnthropicModelSettings
+from pydantic_ai.models.anthropic import AnthropicModel, AnthropicModelSettings
+from pydantic_ai.providers.anthropic import AnthropicProvider
 
+from app.config import settings
 from app.schemas import CompiledRule
 
 
@@ -26,8 +28,12 @@ _INSTRUCTIONS = (
 
 @lru_cache(maxsize=1)
 def get_compiler_agent() -> Agent[CompilerDeps, list[CompiledRule]]:
+    model = AnthropicModel(
+        "claude-sonnet-4-6",
+        provider=AnthropicProvider(api_key=settings.anthropic_api_key),
+    )
     agent: Agent[CompilerDeps, list[CompiledRule]] = Agent(
-        "anthropic:claude-sonnet-4-6",
+        model,
         deps_type=CompilerDeps,
         output_type=list[CompiledRule],
         retries=3,

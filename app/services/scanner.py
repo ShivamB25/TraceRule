@@ -1,4 +1,8 @@
 import logging
+from datetime import date, datetime, timedelta
+from decimal import Decimal
+from ipaddress import IPv4Address, IPv6Address
+from uuid import UUID
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +11,28 @@ from app.agents.explainer import get_explainer_agent
 from app.models import Violation
 
 logger = logging.getLogger(__name__)
+
+
+def _make_json_safe(row: dict) -> dict:
+    out: dict = {}
+    for k, v in row.items():
+        if isinstance(v, Decimal):
+            out[k] = float(v)
+        elif isinstance(v, (datetime, date)):
+            out[k] = v.isoformat()
+        elif isinstance(v, timedelta):
+            out[k] = str(v)
+        elif isinstance(v, UUID):
+            out[k] = str(v)
+        elif isinstance(v, (bytes, memoryview)):
+            out[k] = v.hex() if isinstance(v, bytes) else bytes(v).hex()
+        elif isinstance(v, (IPv4Address, IPv6Address)):
+            out[k] = str(v)
+        elif isinstance(v, (str, int, float, bool, list, dict, type(None))):
+            out[k] = v
+        else:
+            out[k] = str(v)
+    return out
 
 
 async def run_deterministic_scan(db: AsyncSession) -> int:
@@ -37,7 +63,7 @@ async def run_deterministic_scan(db: AsyncSession) -> int:
                 violation = Violation(
                     rule_id=rule["id"],
                     record_pk=pk,
-                    violating_data=dict(record),
+                    violating_data=_make_json_safe(dict(record)),
                 )
                 db.add(violation)
                 known_pks.add(pk)

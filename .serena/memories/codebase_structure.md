@@ -27,7 +27,7 @@ Only info NOT already in AGENTS.md lives here.
 - `autouse=True` fixture runs `create_all` / `drop_all` per test
 - `httpx.AsyncClient` with `ASGITransport` for API testing
 - Config in `pyproject.toml` only (pytest.ini removed)
-- 20 tests across 3 files: `test_rules.py`, `test_violations.py`, `test_scanner.py`
+- 23 tests across 4 files: `test_rules.py` (10), `test_violations.py` (8), `test_scanner.py` (3), `test_policies.py` (3)
 
 ## Docker (multi-stage)
 

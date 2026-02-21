@@ -12,11 +12,25 @@ Deterministic compliance compiler. PDF in, PostgreSQL queries out, human approve
 
 Python >=3.13, FastAPI, PydanticAI (claude-sonnet-4-6 with adaptive thinking), SQLAlchemy 2.x async (asyncpg), APScheduler 3.x, pymupdf4llm. Package manager: uv.
 
+## Live-tested (2026-02-21)
+
+Full end-to-end pipeline verified with live Anthropic API:
+- PDF upload → Claude compiles 3 rules from employee policy → correct SQL generated
+- HITL approve → scan detects 6 violations across 7 employees → AI explanations generated
+- Dedup confirmed: re-scan returns 0 new violations
+- All edge cases pass: 404s, 422s, 400 bad status, filter params
+
 ## Config (.env)
 
 - `DATABASE_URL` — Postgres connection string
-- `ANTHROPIC_API_KEY` — required for compilation
+- `ANTHROPIC_API_KEY` — required for compilation (bridged to os.environ by config.py)
 - `SCAN_INTERVAL_MINUTES` — default 5
+
+## Gotchas discovered during live testing
+
+- PydanticAI reads `ANTHROPIC_API_KEY` from `os.environ`, not from pydantic-settings. Config.py bridges this gap.
+- PostgreSQL `NUMERIC` columns return `Decimal` objects. Scanner's `_make_json_safe()` coerces them to `float` before JSONB insert.
+- `pymupdf4llm.to_markdown()` returns `str | list[dict]` — runtime type narrowing in ingestion.py.
 
 ## Forbidden
 

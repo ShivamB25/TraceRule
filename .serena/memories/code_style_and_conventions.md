@@ -24,8 +24,8 @@ Only conventions NOT already in AGENTS.md live here.
 
 ## Testing
 
-- pytest + pytest-asyncio, `asyncio_mode = "auto"` in pytest.ini.
-- `pythonpath = .` in pytest.ini.
+- pytest + pytest-asyncio, `asyncio_mode = "auto"` in `pyproject.toml` (`[tool.pytest.ini_options]`).
+- `pythonpath = "."` in `pyproject.toml`.
 - `@pytest.mark.asyncio` on all async test functions.
 - In-memory SQLite via aiosqlite + StaticPool.
 - `app.dependency_overrides[get_db]` swaps the session.

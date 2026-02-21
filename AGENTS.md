@@ -1,7 +1,7 @@
 # TraceRule — Project Knowledge Base
 
 **Generated:** 2026-02-21  
-**Commit:** 4cb5798  
+**Commit:** 91ca8d6  
 **Branch:** main
 
 ## OVERVIEW
@@ -139,7 +139,7 @@ uv add <package>                        # Add dependency
 
 ## NOTES
 
-- **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`, `tests/test_violations.py`, `tests/test_scanner.py`). Config in `pyproject.toml` only. 20 tests. No CI/CD.
+- **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`, `tests/test_violations.py`, `tests/test_scanner.py`, `tests/test_policies.py`). Config in `pyproject.toml` only. 23 tests. No CI/CD.
 - **Docker** — Multi-stage `Dockerfile` (build via `ghcr.io/astral-sh/uv`, runtime via `python:3.13-slim-bookworm`, non-root user) + `docker-compose.yml` with PostgreSQL service.
 - **pymupdf4llm.to_markdown()** returns `str | list[dict]` — runtime type narrowing in ingestion.py handles both
 - **Inline imports** in `routes/policies.py` (lines 12, 27) avoid circular deps — intentional
