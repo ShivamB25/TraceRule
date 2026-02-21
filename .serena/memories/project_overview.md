@@ -42,3 +42,17 @@ LangChain, LangGraph, Instructor, Celery, Redis, Docling, Alembic.
 - Upload/ingestion policy consistency fix: background ingestion now uses the same `policy_id` created by upload route (no duplicate policy row for one upload).
 - Frontend now includes a dedicated live request timeline panel with endpoint-level technical trace mode.
 - Demo data workflow no longer requires full AML unzip; capped extraction + loader scripts support 1-2GB demo footprint.
+
+
+## Baseline decisions kept from 2026-02-21
+
+- Compiler uses `claude-sonnet-4-6` with adaptive thinking at `high` effort.
+- Explainer uses the same model with adaptive thinking at `medium` effort.
+- `/scan` route uses `Depends(get_db)` (not manual session factory) to keep tests isolated.
+- Pytest config is centralized in `pyproject.toml` (no separate `pytest.ini`).
+- Docker build follows multi-stage uv pattern; Python baseline is `>=3.13`.
+
+## Validation snapshot
+
+- Backend regression suite: 23 tests passing across rules, violations, scanner, and policies.
+- Live E2E snapshot: 3 compiled rules, 6 violations from 7 records, and re-scan dedup produced 0 new violations.
