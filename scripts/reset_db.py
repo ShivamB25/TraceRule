@@ -11,12 +11,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.database import engine
-
 INTERNAL_TABLES = ("policies", "rules", "violations")
 
 
-async def _list_public_tables() -> list[str]:
+def _get_engine():
+    from app.database import engine
+
+    return engine
+
+
+async def _list_public_tables(engine) -> list[str]:
     async with engine.connect() as conn:
         result = await conn.execute(
             text(
@@ -27,7 +31,7 @@ async def _list_public_tables() -> list[str]:
         return [row[0] for row in result]
 
 
-async def _truncate_tables(table_names: list[str]) -> None:
+async def _truncate_tables(engine, table_names: list[str]) -> None:
     if not table_names:
         return
 
@@ -36,7 +40,7 @@ async def _truncate_tables(table_names: list[str]) -> None:
         await conn.execute(text(f"TRUNCATE TABLE {quoted} RESTART IDENTITY CASCADE"))
 
 
-async def _print_counts(table_names: list[str]) -> None:
+async def _print_counts(engine, table_names: list[str]) -> None:
     async with engine.connect() as conn:
         for table_name in table_names:
             result = await conn.execute(text(f'SELECT COUNT(*) FROM "{table_name}"'))
@@ -60,7 +64,8 @@ async def main() -> None:
     )
     args = parser.parse_args()
 
-    public_tables = await _list_public_tables()
+    engine = _get_engine()
+    public_tables = await _list_public_tables(engine)
     if args.all_public:
         target_tables = public_tables
         mode_label = "ALL public tables"
@@ -85,9 +90,9 @@ async def main() -> None:
             await engine.dispose()
             return
 
-    await _truncate_tables(target_tables)
+    await _truncate_tables(engine, target_tables)
     print("Reset complete. Current row counts:")
-    await _print_counts(target_tables)
+    await _print_counts(engine, target_tables)
     await engine.dispose()
 
 
