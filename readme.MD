@@ -8,7 +8,7 @@ Deterministic AI compliance compiler. Upload a policy PDF, get PostgreSQL querie
 2. **Review** the generated SQL → approve or reject each rule
 3. **Scan** runs on a schedule → executes approved queries, flags violations
 
-The LLM is only involved during step 1. Steps 2 and 3 are pure SQL, deterministic and auditable.
+The LLM is only involved during step 1. Steps 2 and 3 are pure SQL — deterministic, auditable, zero hallucinations.
 
 ## Stack
 
@@ -21,7 +21,7 @@ The LLM is only involved during step 1. Steps 2 and 3 are pure SQL, deterministi
 ## Setup
 
 ```bash
-# Prerequisites: Python 3.14+, PostgreSQL, uv
+# Prerequisites: Python 3.13+, PostgreSQL, uv
 createdb tracerule
 
 cp .env.example .env
@@ -47,7 +47,7 @@ docker compose up --build
 Notes:
 - Compose supports both exported env vars and `.env` values.
 - `ANTHROPIC_API_KEY` can come from either shell export or `.env`.
-- App container uses internal DB host `db` by default via `DOCKER_DATABASE_URL`.
+- App container connects to the `db` service internally via `DATABASE_URL` override in compose.
 - API: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## API

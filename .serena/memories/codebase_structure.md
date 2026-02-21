@@ -26,3 +26,11 @@ Only info NOT already in AGENTS.md lives here.
 - `app.dependency_overrides[get_db]` swaps the DB session
 - `autouse=True` fixture runs `create_all` / `drop_all` per test
 - `httpx.AsyncClient` with `ASGITransport` for API testing
+- Config in `pyproject.toml` only (pytest.ini removed)
+- 20 tests across 3 files: `test_rules.py`, `test_violations.py`, `test_scanner.py`
+
+## Docker (multi-stage)
+
+- Build stage: `ghcr.io/astral-sh/uv:python3.13-bookworm-slim` with cache mounts
+- Runtime stage: `python:3.13-slim-bookworm`, non-root user, no uv in final image
+- CMD runs `uvicorn` directly (not via `uv run`)

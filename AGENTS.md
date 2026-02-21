@@ -10,7 +10,7 @@ Deterministic AI compliance compiler. Ingests legal PDFs, compiles policies into
 
 **Stack:** FastAPI + PydanticAI + SQLAlchemy async + APScheduler 3.x + pymupdf4llm  
 **Model:** `anthropic:claude-sonnet-4-6` with adaptive thinking  
-**Python:** 3.14 | **Package manager:** uv
+**Python:** >=3.13 | **Package manager:** uv
 
 ## STRUCTURE
 
@@ -139,8 +139,8 @@ uv add <package>                        # Add dependency
 
 ## NOTES
 
-- **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`). No CI/CD.
-- **Docker** — `Dockerfile` + `docker-compose.yml` with PostgreSQL service. `DOCKER_DATABASE_URL` overrides DB host inside containers.
+- **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`, `tests/test_violations.py`, `tests/test_scanner.py`). Config in `pyproject.toml` only. 20 tests. No CI/CD.
+- **Docker** — Multi-stage `Dockerfile` (build via `ghcr.io/astral-sh/uv`, runtime via `python:3.13-slim-bookworm`, non-root user) + `docker-compose.yml` with PostgreSQL service.
 - **pymupdf4llm.to_markdown()** returns `str | list[dict]` — runtime type narrowing in ingestion.py handles both
 - **Inline imports** in `routes/policies.py` (lines 12, 27) avoid circular deps — intentional
 - **Ruff** cache exists (`.ruff_cache/`) but no config file — run ad-hoc

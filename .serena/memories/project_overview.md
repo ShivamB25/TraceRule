@@ -10,7 +10,7 @@ Deterministic compliance compiler. PDF in, PostgreSQL queries out, human approve
 
 ## Stack
 
-Python 3.14, FastAPI, PydanticAI (claude-sonnet-4-6 with adaptive thinking), SQLAlchemy 2.x async (asyncpg), APScheduler 3.x, pymupdf4llm. Package manager: uv.
+Python >=3.13, FastAPI, PydanticAI (claude-sonnet-4-6 with adaptive thinking), SQLAlchemy 2.x async (asyncpg), APScheduler 3.x, pymupdf4llm. Package manager: uv.
 
 ## Config (.env)
 
