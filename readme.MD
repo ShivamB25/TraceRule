@@ -13,7 +13,7 @@ The LLM is only involved during step 1. Steps 2 and 3 are pure SQL — determini
 ## Stack
 
 - **FastAPI** — async API
-- **PydanticAI** — structured LLM output via Claude Sonnet 4.5
+- **PydanticAI** — structured LLM output via Claude Sonnet 4.6 (adaptive thinking)
 - **SQLAlchemy** — async ORM with PostgreSQL
 - **APScheduler** — background scan every 5 minutes
 - **pymupdf4llm** — PDF to markdown in <200ms

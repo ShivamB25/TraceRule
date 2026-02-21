@@ -6,7 +6,7 @@
 
 Enterprise compliance scanning at scale fails when built on Retrieval-Augmented Generation (RAG). RAG is probabilistic by design. For every scan of 10 million rows, a RAG system introduces 10 million opportunities for hallucination, non-deterministic reasoning, and token-drain. It is fundamentally unauditable because the logic resides in a black-box latent space during the scan itself.
 
-TraceRule treats legal text as source code. We use Claude Sonnet 4.5 with extended thinking to compile PDF policies into hard-coded PostgreSQL SELECT queries. This shifts the LLM usage to the ingestion phase. Once a rule is compiled into SQL, the scan phase bypasses the LLM entirely. Compliance officers audit the SQL once. Execution is deterministic, fast, and yields zero hallucinations.
+TraceRule treats legal text as source code. We use Claude Sonnet 4.6 with adaptive thinking to compile PDF policies into hard-coded PostgreSQL SELECT queries. This shifts the LLM usage to the ingestion phase. Once a rule is compiled into SQL, the scan phase bypasses the LLM entirely. Compliance officers audit the SQL once. Execution is deterministic, fast, and yields zero hallucinations.
 
 ### The 5 Architectural Pillars
 
@@ -37,4 +37,3 @@ We apply the Mutually Exclusive, Collectively Exhaustive (MECE) framework to pol
 
 #### DERECHA (IEEE TSE 2023)
 Research in the 2023 IEEE Transactions on Software Engineering proves that deterministic code execution yields significantly higher precision for compliance tasks. For GDPR compliance, deterministic approaches achieved over 89% precision, while pure NLP and probabilistic models hovered around 60%. TraceRule implements this research by converting natural language requirements into executable code.
-

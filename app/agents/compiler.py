@@ -27,12 +27,13 @@ _INSTRUCTIONS = (
 @lru_cache(maxsize=1)
 def get_compiler_agent() -> Agent[CompilerDeps, list[CompiledRule]]:
     agent: Agent[CompilerDeps, list[CompiledRule]] = Agent(
-        "anthropic:claude-sonnet-4-5",
+        "anthropic:claude-sonnet-4-6",
         deps_type=CompilerDeps,
         output_type=list[CompiledRule],
         retries=3,
         model_settings=AnthropicModelSettings(
-            anthropic_thinking={"type": "enabled", "budget_tokens": 4000},
+            anthropic_thinking={"type": "adaptive"},
+            anthropic_effort="high",
         ),
         instructions=_INSTRUCTIONS,
     )

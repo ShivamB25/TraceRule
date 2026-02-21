@@ -9,7 +9,7 @@
 Deterministic AI compliance compiler. Ingests legal PDFs, compiles policies into PostgreSQL queries via PydanticAI/Claude, human approves the SQL, APScheduler executes approved queries to detect violations. Zero LLM during scan phase.
 
 **Stack:** FastAPI + PydanticAI + SQLAlchemy async + APScheduler 3.x + pymupdf4llm  
-**Model:** `anthropic:claude-sonnet-4-5` with extended thinking  
+**Model:** `anthropic:claude-sonnet-4-6` with adaptive thinking  
 **Python:** 3.14 | **Package manager:** uv
 
 ## STRUCTURE
@@ -91,7 +91,7 @@ Phase 3: SCAN (APScheduler, zero LLM)
 ### PydanticAI (verified against v0.7+ docs)
 - Constructor: `output_type=` — NEVER `result_type=` (deprecated)
 - Results: `result.output` — NEVER `result.data` (deprecated)
-- Extended thinking: `AnthropicModelSettings(anthropic_thinking={"type": "enabled", "budget_tokens": 4000})`
+- Adaptive thinking: `AnthropicModelSettings(anthropic_thinking={"type": "adaptive"}, anthropic_effort="high")`
 - Dynamic prompts: `@agent.system_prompt` with `RunContext[DepsType]`
 - Lazy init: `@lru_cache(maxsize=1)` factory — agent validates API key at construction, crashes if missing
 
