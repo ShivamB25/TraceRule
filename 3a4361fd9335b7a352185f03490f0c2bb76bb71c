@@ -1,0 +1,62 @@
+app/agents/compiler.py
+  a64085c534f04fad 30,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "3a4361fd9335b7a352185f03490f0c2bb76bb71c",
+  "prompts": {
+    "3a96561499c275b7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-368b08dc-0f54-4591-be0c-dea082a27882",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "3c4315dd161b072c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-5efce461-6348-4ee7-9070-b00c33d035bd",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "8cb028939ee28dd2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-6f80f7af-d6e8-40fa-877c-fa6f88a1e470",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "a64085c534f04fad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3f52b59f-c1ca-42f6-ac55-efca6e0c4e55",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
