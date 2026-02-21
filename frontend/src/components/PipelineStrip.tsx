@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { FileText, UserCheck, Radar } from 'lucide-react'
 
 const steps = [
@@ -6,9 +7,9 @@ const steps = [
   { num: 3, title: 'Deterministic Enforcement', desc: 'Zero LLM scan', icon: Radar, color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
 ] as const
 
-export default function PipelineStrip() {
+function PipelineStrip() {
   return (
-    <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-0">
+    <section aria-label="Compliance pipeline" className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-0">
       {steps.map((step, i) => (
         <div key={step.num} className="flex items-center sm:flex-1">
           <div className={`flex w-full items-center gap-3 rounded-lg border ${step.border} ${step.bg} px-4 py-3`}>
@@ -28,6 +29,8 @@ export default function PipelineStrip() {
           )}
         </div>
       ))}
-    </div>
+    </section>
   )
 }
+
+export default memo(PipelineStrip)

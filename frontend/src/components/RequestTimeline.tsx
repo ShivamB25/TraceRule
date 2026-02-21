@@ -32,11 +32,12 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Compliance Lifecycle Timeline</h2>
-          <p className="text-xs text-slate-500">Live trace of policy ingestion, approval actions, scan execution, and violation enrichment.</p>
+          <p className="text-xs text-slate-400">Live trace of policy ingestion, approval actions, scan execution, and violation enrichment.</p>
         </div>
         <button
           type="button"
           onClick={() => setTechnicalMode((prev) => !prev)}
+          aria-pressed={technicalMode}
           className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium outline-none transition-colors ${
             technicalMode
               ? 'border-blue-500/40 bg-blue-500/15 text-blue-300'
@@ -53,7 +54,7 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
           No events yet. Upload a policy file to start the trace.
         </div>
       ) : (
-        <ol className="space-y-3">
+          <ol className="space-y-3" aria-live="polite" aria-label="Timeline events">
           {events.map((event) => (
             <li key={event.id} className="rounded-lg border border-slate-700/80 bg-slate-800/60 px-4 py-3">
               <div className="flex items-start gap-3">

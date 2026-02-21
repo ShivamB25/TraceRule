@@ -72,6 +72,7 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
             type="button"
             onClick={() => handleAction('approve')}
             disabled={acting !== null}
+            aria-busy={acting === 'approve'}
             className="flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white outline-none transition-all duration-200 hover:bg-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-500/50 disabled:opacity-50"
           >
             {acting === 'approve' ? (
@@ -85,6 +86,7 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
             type="button"
             onClick={() => handleAction('reject')}
             disabled={acting !== null}
+            aria-busy={acting === 'reject'}
             className="flex items-center gap-2 rounded-lg border border-red-500/50 px-6 py-2 text-sm font-medium text-red-400 outline-none transition-all duration-200 hover:bg-red-500/10 focus-visible:ring-4 focus-visible:ring-red-500/50 disabled:opacity-50"
           >
             {acting === 'reject' ? (

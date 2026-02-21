@@ -4,6 +4,12 @@
 :root {
   --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
   --font-body: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --surface-panel: rgb(15 23 42 / 0.95);
+  --surface-card: rgb(30 41 59 / 0.4);
+  --shadow-card: 0 20px 40px -35px rgba(15, 23, 42, 1);
+  --shadow-panel: 0 24px 60px -45px rgba(15, 23, 42, 1);
+  --transition-fast: 180ms ease-out;
+  --transition-normal: 220ms ease-out;
 }
 
 body {
@@ -37,4 +43,35 @@ h4 {
 
 html {
   scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-slide {
+  animation: fade-slide-up 220ms ease-out both;
 }

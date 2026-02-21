@@ -1,8 +1,10 @@
+import { memo } from 'react'
+
 interface SqlBlockProps {
   sql: string | null
 }
 
-export default function SqlBlock({ sql }: SqlBlockProps) {
+function SqlBlock({ sql }: SqlBlockProps) {
   if (!sql) {
     return (
       <div className="rounded-lg bg-slate-950 p-4">
@@ -17,3 +19,5 @@ export default function SqlBlock({ sql }: SqlBlockProps) {
     </div>
   )
 }
+
+export default memo(SqlBlock)

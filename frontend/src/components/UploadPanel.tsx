@@ -11,18 +11,29 @@ interface UploadPanelProps {
 
 export default function UploadPanel({ uploading, lastUpload, extractedCount, onUpload }: UploadPanelProps) {
   const [dragOver, setDragOver] = useState(false)
+  const [fileHint, setFileHint] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files[0]
-    if (file) onUpload(file)
+    if (file) {
+      const name = file.name.toLowerCase()
+      const allowed = name.endsWith('.pdf') || name.endsWith('.md') || name.endsWith('.markdown')
+      setFileHint(allowed ? `Selected ${file.name}` : 'Unsupported file type. Use .pdf or .md')
+      if (allowed) onUpload(file)
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) onUpload(file)
+    if (file) {
+      const name = file.name.toLowerCase()
+      const allowed = name.endsWith('.pdf') || name.endsWith('.md') || name.endsWith('.markdown')
+      setFileHint(allowed ? `Selected ${file.name}` : 'Unsupported file type. Use .pdf or .md')
+      if (allowed) onUpload(file)
+    }
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -44,14 +55,16 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
 
       <button
         type="button"
+        aria-label="Upload policy document. Drag and drop or click to browse files"
+        aria-busy={uploading || isProcessing}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`flex w-full cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed p-10 outline-none transition-all duration-200 focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/20 ${
+        className={`flex w-full cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed p-10 outline-none transition-all duration-200 ease-out focus-visible:border-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/20 ${
           dragOver
-            ? 'border-blue-500 bg-slate-800/50'
-            : 'border-slate-600 bg-gradient-to-b from-slate-900/30 to-slate-900/80 hover:border-slate-500 hover:bg-slate-800/30'
+            ? 'border-blue-400 bg-slate-800/60 ring-1 ring-blue-400/30'
+            : 'border-slate-600 bg-gradient-to-b from-slate-900/30 to-slate-900/80 hover:border-slate-500 hover:bg-slate-800/30 hover:-translate-y-0.5'
         }`}
       >
         {uploading || isProcessing ? (
@@ -83,9 +96,12 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
           type="file"
           accept=".pdf,.md,.markdown,text/markdown"
           onChange={handleFileChange}
+          aria-label="Upload policy file"
           className="hidden"
         />
       </button>
+
+      {fileHint && <p className="mt-3 text-xs text-slate-400" aria-live="polite">{fileHint}</p>}
 
       {lastUpload && (
         <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">

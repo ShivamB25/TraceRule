@@ -10,6 +10,7 @@ interface ReviewPanelProps {
   onTabChange: (tab: TabStatus) => void
   onApprove: (id: number) => Promise<void>
   onReject: (id: number) => Promise<void>
+  loading: boolean
 }
 
 const tabs: { status: TabStatus; label: string; icon: typeof ClipboardList }[] = [
@@ -18,7 +19,7 @@ const tabs: { status: TabStatus; label: string; icon: typeof ClipboardList }[] =
   { status: 'rejected', label: 'Rejected', icon: XCircle },
 ]
 
-export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, onReject }: ReviewPanelProps) {
+export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, onReject, loading }: ReviewPanelProps) {
   const counts: Record<TabStatus, number> = {
     pending_review: rules.filter((r) => r.status === 'pending_review').length,
     approved: rules.filter((r) => r.status === 'approved').length,
@@ -34,14 +35,16 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
         <p className="text-xs text-slate-500">This is the enforcement gate. Approve only rules you are ready to run against production-style data.</p>
       </div>
 
-      <div role="tablist" aria-label="Rule status tabs" className="mb-6 flex gap-1 border-b border-slate-700">
+      <div role="tablist" aria-label="Rule status tabs" className="mb-6 flex flex-wrap gap-1 border-b border-slate-700">
         {tabs.map(({ status, label, icon: Icon }) => (
           <button
             key={status}
             type="button"
+            id={`tab-${status}`}
             onClick={() => onTabChange(status)}
             role="tab"
             aria-selected={activeTab === status}
+            aria-controls={`panel-${status}`}
             className={`flex min-h-11 items-center gap-2 rounded-t-md px-4 py-2.5 text-sm font-medium outline-none transition-all duration-200 focus-visible:bg-slate-800 ${
               activeTab === status
                 ? 'border-b-2 border-blue-500 bg-slate-800/70 text-white'
@@ -61,15 +64,26 @@ export default function ReviewPanel({ rules, activeTab, onTabChange, onApprove, 
         ))}
       </div>
 
-      <div className="space-y-4">
-        {filtered.length === 0 ? (
+      <div role="tabpanel" id={`panel-${activeTab}`} aria-labelledby={`tab-${activeTab}`} className="space-y-4">
+        {loading ? (
+          ['rule-a', 'rule-b', 'rule-c'].map((item) => (
+            <div key={item} className="animate-pulse rounded-lg border border-slate-700 bg-slate-800/40 p-6">
+              <div className="h-5 w-2/5 rounded bg-slate-700/50" />
+              <div className="mt-3 h-4 w-full rounded bg-slate-700/40" />
+              <div className="mt-2 h-4 w-4/5 rounded bg-slate-700/30" />
+            </div>
+          ))
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-slate-700 py-12 text-slate-500">
             <ClipboardList className="h-8 w-8" />
             <p className="text-sm">No {activeTab.replace('_', ' ')} rules right now</p>
+            <p className="text-xs text-slate-400">Upload a policy to generate rules, then review here.</p>
           </div>
         ) : (
-          filtered.map((rule) => (
-            <RuleCard key={rule.id} rule={rule} onApprove={onApprove} onReject={onReject} />
+          filtered.map((rule, index) => (
+            <div key={rule.id} className="animate-fade-slide" style={{ animationDelay: `${index * 45}ms` }}>
+              <RuleCard rule={rule} onApprove={onApprove} onReject={onReject} />
+            </div>
           ))
         )}
       </div>

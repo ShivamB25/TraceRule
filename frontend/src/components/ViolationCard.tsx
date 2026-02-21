@@ -11,9 +11,9 @@ export default function ViolationCard({ violation, rules }: ViolationCardProps) 
   return (
     <article className="rounded-lg border-l-4 border-red-500 bg-slate-800/90 p-5 shadow-[0_20px_40px_-35px_rgba(15,23,42,1)]">
       <div className="mb-3">
-        <p className="text-sm font-medium text-white">
+        <h3 className="text-sm font-medium text-white">
           Rule: {rule?.title ?? `#${violation.rule_id}`}
-        </p>
+        </h3>
         <p className="text-xs text-slate-500">Record: #{violation.record_pk}</p>
       </div>
 
@@ -21,11 +21,11 @@ export default function ViolationCard({ violation, rules }: ViolationCardProps) 
         <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">
           Violating Data
         </p>
-        <div className="overflow-x-auto rounded-lg bg-slate-950 p-3">
+        <section className="overflow-x-auto rounded-lg bg-slate-950 p-3" aria-label="Violating record data in JSON format">
           <pre className="font-mono text-xs text-slate-300">
             {JSON.stringify(violation.violating_data, null, 2)}
           </pre>
-        </div>
+        </section>
       </div>
 
       {violation.ai_explanation ? (

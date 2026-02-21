@@ -5,9 +5,23 @@ interface StatsBarProps {
   approvedRules: number
   pendingRules: number
   totalViolations: number
+  loading: boolean
 }
 
-export default function StatsBar({ totalRules, approvedRules, pendingRules, totalViolations }: StatsBarProps) {
+export default function StatsBar({ totalRules, approvedRules, pendingRules, totalViolations, loading }: StatsBarProps) {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-live="polite">
+        {['total', 'approved', 'pending', 'violations'].map((item) => (
+          <div key={`stat-skeleton-${item}`} className="animate-pulse rounded-lg border border-slate-700/80 bg-slate-800/40 px-4 py-3">
+            <div className="h-5 w-10 rounded bg-slate-700/50" />
+            <div className="mt-2 h-3 w-20 rounded bg-slate-700/40" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   if (totalRules === 0) return null
 
   const stats = [
