@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 
 import pymupdf4llm
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.compiler import CompilerDeps, get_compiler_agent
@@ -54,6 +54,7 @@ async def ingest_policy(
     db: AsyncSession,
     file_bytes: bytes,
     filename: str,
+    policy_id: int | None = None,
 ) -> int:
     with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         tmp.write(file_bytes)
@@ -69,10 +70,30 @@ async def ingest_policy(
     finally:
         tmp_path.unlink(missing_ok=True)
 
-    policy = Policy(filename=filename, markdown_text=markdown_text, status="processing")
-    db.add(policy)
-    await db.flush()
-    policy_id = policy.id
+    policy: Policy
+    if policy_id is not None:
+        result = await db.execute(select(Policy).where(Policy.id == policy_id))
+        existing = result.scalar_one_or_none()
+        if existing is None:
+            logger.warning(
+                "Policy %d not found during background ingestion, creating a new policy",
+                policy_id,
+            )
+            policy = Policy(filename=filename, markdown_text="", status="processing")
+            db.add(policy)
+            await db.flush()
+            policy_id = policy.id
+        else:
+            policy = existing
+            policy.filename = filename
+    else:
+        policy = Policy(filename=filename, markdown_text="", status="processing")
+        db.add(policy)
+        await db.flush()
+        policy_id = policy.id
+
+    policy.markdown_text = markdown_text
+    policy.status = "processing"
 
     try:
         schema_context = await _introspect_db_schema(db)

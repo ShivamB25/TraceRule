@@ -8,11 +8,11 @@ from app.services.ingestion import ingest_policy
 router = APIRouter(tags=["policies"])
 
 
-async def _background_ingest(file_bytes: bytes, filename: str) -> None:
+async def _background_ingest(file_bytes: bytes, filename: str, policy_id: int) -> None:
     from app.database import async_session_factory
 
     async with async_session_factory() as db:
-        await ingest_policy(db, file_bytes, filename)
+        await ingest_policy(db, file_bytes, filename, policy_id=policy_id)
 
 
 @router.post("/policies/upload", response_model=PolicyUploadResponse)
@@ -31,6 +31,6 @@ async def upload_policy(
     await db.commit()
     await db.refresh(policy)
 
-    background_tasks.add_task(_background_ingest, file_bytes, filename)
+    background_tasks.add_task(_background_ingest, file_bytes, filename, policy.id)
 
     return PolicyUploadResponse(id=policy.id, filename=filename, status="processing")
