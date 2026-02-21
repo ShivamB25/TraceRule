@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import async_session_factory, get_db
+from app.database import get_db
 from app.models import Violation
 from app.schemas import ScanResult, ViolationResponse
 from app.services.scanner import run_deterministic_scan
@@ -41,7 +41,8 @@ async def get_violation(
 
 
 @router.post("/scan", response_model=ScanResult)
-async def trigger_scan() -> ScanResult:
-    async with async_session_factory() as db:
-        count = await run_deterministic_scan(db)
+async def trigger_scan(
+    db: AsyncSession = Depends(get_db),
+) -> ScanResult:
+    count = await run_deterministic_scan(db)
     return ScanResult(violations_found=count)

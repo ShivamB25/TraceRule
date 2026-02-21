@@ -3,7 +3,7 @@ name = "tracerule"
 version = "0.1.0"
 description = "The Deterministic AI Compliance Compiler"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.83.0",
     "apscheduler>=3.11.2",
@@ -28,3 +28,4 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = "."
