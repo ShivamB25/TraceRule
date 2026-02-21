@@ -45,8 +45,8 @@ docs/
 | `Violation` | models.py | ORM | rule_id, record_pk, violating_data(JSONB), ai_explanation, status(open) |
 | `CompiledRule` | schemas.py | Pydantic BaseModel | Agent output_type for compiler |
 | `CompilerDeps` | agents/compiler.py | dataclass | db_schema_context: str |
-| `get_compiler_agent` | agents/compiler.py | @lru_cache factory | Agent[CompilerDeps, list[CompiledRule]] with extended thinking |
-| `get_explainer_agent` | agents/explainer.py | @lru_cache factory | Agent[None, str] — 2-sentence violation explanations |
+| `get_compiler_agent` | agents/compiler.py | @lru_cache factory | Agent[CompilerDeps, list[CompiledRule]] using `anthropic:claude-sonnet-4-6` + adaptive thinking |
+| `get_explainer_agent` | agents/explainer.py | @lru_cache factory | Agent[None, str] on `anthropic:claude-sonnet-4-6` (adaptive thinking enabled) |
 | `ingest_policy` | services/ingestion.py | async func | Full pipeline: PDF bytes → markdown → compile → save rules |
 | `_introspect_db_schema` | services/ingestion.py | async func | Queries information_schema.columns, skips internal tables |
 | `run_deterministic_scan` | services/scanner.py | async func | Execute approved SQL, dedup by rule_id+record_pk, save violations |

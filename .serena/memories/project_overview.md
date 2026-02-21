@@ -6,7 +6,7 @@ Deterministic AI compliance compiler. Ingests legal/compliance PDFs, compiles po
 ## Tech Stack
 - **Python 3.14** (managed with `uv`)
 - **FastAPI** — async REST API
-- **PydanticAI** (v1.62+) — structured LLM output via `anthropic:claude-sonnet-4-5` with extended thinking
+- **PydanticAI** (v1.62+) — structured LLM output via `anthropic:claude-sonnet-4-6` with adaptive thinking (`anthropic_thinking={"type":"adaptive"}` + `anthropic_effort`)
 - **SQLAlchemy 2.x** — async ORM with PostgreSQL (asyncpg driver)
 - **APScheduler 3.x** — background scan every N minutes (NOT v4)
 - **pymupdf4llm** — PDF-to-markdown extraction
