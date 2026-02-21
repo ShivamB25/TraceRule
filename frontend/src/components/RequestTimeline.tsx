@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { TerminalSquare } from 'lucide-react'
+
 type TimelineKind = 'info' | 'success' | 'warning' | 'error'
 
 export interface TimelineEvent {
@@ -6,6 +9,8 @@ export interface TimelineEvent {
   kind: TimelineKind
   title: string
   detail?: string
+  request?: string
+  response?: string
 }
 
 interface RequestTimelineProps {
@@ -20,11 +25,27 @@ const colorByKind: Record<TimelineKind, string> = {
 }
 
 export default function RequestTimeline({ events }: RequestTimelineProps) {
+  const [technicalMode, setTechnicalMode] = useState(false)
+
   return (
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-white">Live Request Timeline</h2>
-        <p className="text-xs text-slate-500">Frontend actions and backend API lifecycle in real time.</p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Live Request Timeline</h2>
+          <p className="text-xs text-slate-500">Frontend actions and backend API lifecycle in real time.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setTechnicalMode((prev) => !prev)}
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium outline-none transition-colors ${
+            technicalMode
+              ? 'border-blue-500/40 bg-blue-500/15 text-blue-300'
+              : 'border-slate-600 bg-slate-800 text-slate-300 hover:bg-slate-700'
+          }`}
+        >
+          <TerminalSquare className="h-3.5 w-3.5" />
+          {technicalMode ? 'Technical mode on' : 'Technical mode off'}
+        </button>
       </div>
 
       {events.length === 0 ? (
@@ -45,6 +66,20 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
                     </span>
                   </div>
                   {event.detail && <p className="mt-1 text-xs text-slate-400">{event.detail}</p>}
+                  {technicalMode && (event.request || event.response) && (
+                    <div className="mt-2 space-y-1 rounded-md border border-slate-700 bg-slate-900/70 p-2">
+                      {event.request && (
+                        <p className="font-mono text-[11px] text-slate-300">
+                          <span className="text-slate-500">request:</span> {event.request}
+                        </p>
+                      )}
+                      {event.response && (
+                        <p className="font-mono text-[11px] text-slate-300">
+                          <span className="text-slate-500">response:</span> {event.response}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </li>

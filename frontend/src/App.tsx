@@ -64,12 +64,16 @@ export default function App() {
           kind: 'info',
           title: 'Dashboard loaded',
           detail: `Fetched ${r.length} rule(s) and ${v.length} violation(s) from backend`,
+          request: 'GET /api/v1/rules + GET /api/v1/violations',
+          response: `200 OK, rules=${r.length}, violations=${v.length}`,
         })
       } else if (showSpinner) {
         pushTimeline({
           kind: 'info',
           title: 'Manual refresh complete',
           detail: `Now showing ${r.length} rule(s) and ${v.length} violation(s)`,
+          request: 'GET /api/v1/rules + GET /api/v1/violations',
+          response: `200 OK, rules=${r.length}, violations=${v.length}`,
         })
       }
     } catch (err) {
@@ -78,6 +82,7 @@ export default function App() {
         kind: 'error',
         title: 'Data refresh failed',
         detail: err instanceof Error ? err.message : 'Failed to load data',
+        request: 'GET /api/v1/rules + GET /api/v1/violations',
       })
       console.error(err)
     } finally {
@@ -96,6 +101,7 @@ export default function App() {
       kind: 'info',
       title: 'Compilation started',
       detail: `Polling rules for policy #${lastUpload.id}`,
+      request: `GET /api/v1/rules?policy_id=${lastUpload.id} (poll every 3s)`,
     })
 
     let attempts = 0
@@ -114,6 +120,8 @@ export default function App() {
             kind: 'success',
             title: 'Rules generated',
             detail: `${newRules.length} rule(s) compiled for policy #${lastUpload.id}`,
+            request: `GET /api/v1/rules?policy_id=${lastUpload.id}`,
+            response: `200 OK, count=${newRules.length}`,
           })
           clearInterval(interval)
           return
@@ -125,6 +133,8 @@ export default function App() {
             kind: 'warning',
             title: 'Compilation still running',
             detail: `No rules yet for policy #${lastUpload.id} after 2 minutes`,
+            request: `GET /api/v1/rules?policy_id=${lastUpload.id}`,
+            response: '200 OK, count=0',
           })
           clearInterval(interval)
         }
@@ -167,6 +177,7 @@ export default function App() {
         kind: 'info',
         title: 'Generating explanations',
         detail: 'Backend is enriching new violations with AI explanations',
+        request: 'GET /api/v1/violations (poll every 5s)',
       })
     } else if (!hasPending && explanationsPendingRef.current) {
       explanationsPendingRef.current = false
@@ -174,6 +185,8 @@ export default function App() {
         kind: 'success',
         title: 'Explanations ready',
         detail: 'All visible violations now have AI explanations',
+        request: 'GET /api/v1/violations',
+        response: '200 OK, all ai_explanation fields present',
       })
     }
   }, [pushTimeline, violations])
@@ -185,6 +198,7 @@ export default function App() {
       kind: 'info',
       title: 'Upload started',
       detail: file.name,
+      request: 'POST /api/v1/policies/upload',
     })
     try {
       const result = await uploadPolicy(file)
@@ -195,6 +209,8 @@ export default function App() {
         kind: 'success',
         title: 'Upload accepted',
         detail: `Policy #${result.id} queued for compilation`,
+        request: 'POST /api/v1/policies/upload',
+        response: `200 OK, policy_id=${result.id}, status=processing`,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
@@ -202,6 +218,7 @@ export default function App() {
         kind: 'error',
         title: 'Upload failed',
         detail: err instanceof Error ? err.message : 'Upload failed',
+        request: 'POST /api/v1/policies/upload',
       })
       console.error('Upload failed:', err)
     } finally {
@@ -219,6 +236,8 @@ export default function App() {
         kind: 'success',
         title: 'Rule approved',
         detail: `Rule #${id} is now eligible for scan`,
+        request: `PATCH /api/v1/rules/${id}/approve`,
+        response: '200 OK, status=approved',
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to approve rule')
@@ -226,6 +245,7 @@ export default function App() {
         kind: 'error',
         title: 'Approve failed',
         detail: err instanceof Error ? err.message : 'Failed to approve rule',
+        request: `PATCH /api/v1/rules/${id}/approve`,
       })
     }
   }, [pushTimeline])
@@ -240,6 +260,8 @@ export default function App() {
         kind: 'warning',
         title: 'Rule rejected',
         detail: `Rule #${id} removed from scan path`,
+        request: `PATCH /api/v1/rules/${id}/reject`,
+        response: '200 OK, status=rejected',
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reject rule')
@@ -247,6 +269,7 @@ export default function App() {
         kind: 'error',
         title: 'Reject failed',
         detail: err instanceof Error ? err.message : 'Failed to reject rule',
+        request: `PATCH /api/v1/rules/${id}/reject`,
       })
     }
   }, [pushTimeline])
@@ -258,6 +281,7 @@ export default function App() {
       kind: 'info',
       title: 'Manual scan started',
       detail: 'Calling POST /api/v1/scan',
+      request: 'POST /api/v1/scan',
     })
     try {
       const result = await triggerScan()
@@ -272,6 +296,8 @@ export default function App() {
         kind: result.violations_found > 0 ? 'warning' : 'success',
         title: 'Scan completed',
         detail: `${result.violations_found} new violation(s) found`,
+        request: 'POST /api/v1/scan -> GET /api/v1/violations',
+        response: `200 OK, violations_found=${result.violations_found}`,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Scan failed')
@@ -279,6 +305,7 @@ export default function App() {
         kind: 'error',
         title: 'Scan failed',
         detail: err instanceof Error ? err.message : 'Scan failed',
+        request: 'POST /api/v1/scan',
       })
       console.error('Scan failed:', err)
     } finally {
@@ -307,7 +334,7 @@ export default function App() {
         lastScanCount={lastScanCount}
         onScan={handleScan}
         onRefresh={() => {
-          pushTimeline({ kind: 'info', title: 'Manual refresh started', detail: 'Refreshing rules and violations' })
+          pushTimeline({ kind: 'info', title: 'Manual refresh started', detail: 'Refreshing rules and violations', request: 'GET /api/v1/rules + GET /api/v1/violations' })
           void refreshData(true)
         }}
         approvedCount={approvedCount}
