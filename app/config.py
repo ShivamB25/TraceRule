@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     )
     anthropic_api_key: str = ""
     scan_interval_minutes: int = 5
+    explanation_model_limit_per_scan: int = 25
 
     model_config = {"env_file": ".env"}
 

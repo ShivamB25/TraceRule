@@ -247,6 +247,7 @@ docs/                        # Architecture research, judges document
 | `DATABASE_URL` | No | `postgresql+asyncpg://postgres:postgres@localhost:5432/tracerule` | PostgreSQL connection string (must use `asyncpg` driver) |
 | `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key for Claude. Required for policy compilation and violation explanations. Not needed for tests. |
 | `SCAN_INTERVAL_MINUTES` | No | `5` | How often APScheduler runs the compliance scan |
+| `EXPLANATION_MODEL_LIMIT_PER_SCAN` | No | `25` | Max number of violations per scan that use model-generated explanations. Overflow violations get deterministic fallback text to prevent API overuse. |
 
 ## Stack
 
@@ -336,3 +337,12 @@ Test a rule's SQL manually:
 ```bash
 psql tracerule -c "SELECT id, age FROM employees WHERE age < 18;"
 ```
+
+### Very large scan result sets create too many explanation calls
+
+By default, TraceRule limits model-based explanations to 25 violations per scan run.
+
+- First N rows (`EXPLANATION_MODEL_LIMIT_PER_SCAN`) get model-generated explanations
+- Remaining rows get deterministic fallback text
+
+This avoids runaway model usage while keeping every violation explainable in the UI.

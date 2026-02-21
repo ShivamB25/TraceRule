@@ -8,6 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.explainer import get_explainer_agent
+from app.config import settings
 from app.models import Violation
 
 logger = logging.getLogger(__name__)
@@ -79,17 +80,45 @@ async def run_deterministic_scan(db: AsyncSession) -> int:
     return violation_count
 
 
-async def _explain_new_violations(db: AsyncSession) -> None:
+def _build_fallback_explanation(row: dict) -> str:
+    return (
+        f"Matched approved deterministic rule '{row['title']}' for violation #{row['id']}. "
+        "Review violating_data and the compiled SQL result in the dashboard for details."
+    )
+
+
+async def _explain_new_violations(
+    db: AsyncSession, max_model_calls: int | None = None
+) -> None:
+    limit = (
+        settings.explanation_model_limit_per_scan
+        if max_model_calls is None
+        else max_model_calls
+    )
+    limit = max(limit, 0)
+
     result = await db.execute(
         text(
             "SELECT v.id, v.violating_data, r.title, r.compiled_sql "
             "FROM violations v "
             "JOIN rules r ON v.rule_id = r.id "
-            "WHERE v.ai_explanation IS NULL"
+            "WHERE v.ai_explanation IS NULL "
+            "ORDER BY v.id ASC"
         )
     )
 
-    for row in result.mappings():
+    pending_rows = list(result.mappings())
+    model_rows = pending_rows[:limit]
+    fallback_rows = pending_rows[limit:]
+
+    if fallback_rows:
+        logger.info(
+            "Capping model explanations at %d for this scan; using fallback text for %d violations",
+            limit,
+            len(fallback_rows),
+        )
+
+    for row in model_rows:
         try:
             prompt = (
                 f"Rule: {row['title']}\n"
@@ -105,5 +134,20 @@ async def _explain_new_violations(db: AsyncSession) -> None:
             )
         except Exception as e:
             logger.error("Explanation failed for violation %d: %s", row["id"], e)
+            await db.execute(
+                text(
+                    "UPDATE violations SET ai_explanation = :explanation WHERE id = :id"
+                ),
+                {
+                    "explanation": _build_fallback_explanation(dict(row)),
+                    "id": row["id"],
+                },
+            )
+
+    for row in fallback_rows:
+        await db.execute(
+            text("UPDATE violations SET ai_explanation = :explanation WHERE id = :id"),
+            {"explanation": _build_fallback_explanation(dict(row)), "id": row["id"]},
+        )
 
     await db.commit()

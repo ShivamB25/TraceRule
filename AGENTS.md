@@ -167,4 +167,5 @@ uv add <package>                        # Add dependency
 - **Docker** — Multi-stage `Dockerfile` (build via `ghcr.io/astral-sh/uv`, runtime via `python:3.13-slim-bookworm`, non-root user) + `docker-compose.yml` with PostgreSQL service.
 - **Ingestion formats** — `.pdf` uses `pymupdf4llm.to_markdown()` (`str | list[dict]` handled), `.md` uses UTF-8 decode
 - **Inline imports** in `routes/policies.py` (lines 12, 27) avoid circular deps — intentional
+- **Explanation cap** — `EXPLANATION_MODEL_LIMIT_PER_SCAN` (default 25) limits model-generated explanations per scan; overflow rows get deterministic fallback text.
 - **Ruff** cache exists (`.ruff_cache/`) but no config file — run ad-hoc
