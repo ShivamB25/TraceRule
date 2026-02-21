@@ -42,3 +42,5 @@ docs/FRONTEND_PROMPT.md
 docs/BACKEND_DATA_PROMPT.md
 docs/FRONTEND_UPDATE_PROMPT.md
 docs/JUDGES.md
+data/**
+ibm-transactions-for-anti-money-laundering-aml.zip
