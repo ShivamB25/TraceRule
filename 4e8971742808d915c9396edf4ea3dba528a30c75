@@ -1,0 +1,60 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "4e8971742808d915c9396edf4ea3dba528a30c75",
+  "prompts": {
+    "920c2efb8bbaa700": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-64ac1aaa-0d3b-4aae-b94d-3d20906a4b8a",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "9d9e2c86aafd630c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-84fa74fc-5235-4116-a877-353d3255c7f4",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    },
+    "c982f6149feddee4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-6772ff4a-9544-4d11-8feb-1a3c44a6c3ad",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "cc682d3f1797123f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-1f676685-ee9a-44bf-91d9-155242bb4360",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 3,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
