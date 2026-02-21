@@ -192,6 +192,18 @@ export default function App() {
   }, [pushTimeline, violations])
 
   const handleUpload = useCallback(async (file: File) => {
+    const name = file.name.toLowerCase()
+    const allowed = name.endsWith('.pdf') || name.endsWith('.md') || name.endsWith('.markdown')
+    if (!allowed) {
+      setError('Unsupported file type. Upload a .pdf or .md file.')
+      pushTimeline({
+        kind: 'warning',
+        title: 'Upload blocked',
+        detail: `${file.name} is not a supported policy file`,
+      })
+      return
+    }
+
     setUploading(true)
     setError(null)
     pushTimeline({

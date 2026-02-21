@@ -1,4 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile
+from pathlib import Path
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -23,6 +25,12 @@ async def upload_policy(
 ) -> PolicyUploadResponse:
     file_bytes = await file.read()
     filename = file.filename or "unknown.pdf"
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".pdf", ".md", ".markdown"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type. Upload a .pdf or .md file.",
+        )
 
     from app.models import Policy
 

@@ -50,7 +50,7 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
 
       {events.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-700 py-8 text-center text-sm text-slate-500">
-          No events yet. Upload a policy PDF to start the trace.
+          No events yet. Upload a policy file to start the trace.
         </div>
       ) : (
         <ol className="space-y-3">

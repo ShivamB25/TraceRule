@@ -6,7 +6,7 @@
 
 ## OVERVIEW
 
-Deterministic AI compliance compiler. Ingests legal PDFs, compiles policies into PostgreSQL queries via PydanticAI/Claude, human approves the SQL, APScheduler executes approved queries to detect violations. Zero LLM during scan phase.
+Deterministic AI compliance compiler. Ingests policy files (`.pdf` or `.md`), compiles policies into PostgreSQL queries via PydanticAI/Claude, human approves the SQL, APScheduler executes approved queries to detect violations. Zero LLM during scan phase.
 
 **Stack:** FastAPI + PydanticAI + SQLAlchemy async + APScheduler 3.x + pymupdf4llm  
 **Model:** `anthropic:claude-sonnet-4-6` with adaptive thinking  
@@ -22,10 +22,10 @@ app/
 ├── models.py            # Policy, Rule, Violation (SQLAlchemy async)
 ├── schemas.py           # CompiledRule (agent output) + API req/res models
 ├── agents/
-│   ├── compiler.py      # PDF text -> list[CompiledRule] via Claude
+│   ├── compiler.py      # policy text -> list[CompiledRule] via Claude
 │   └── explainer.py     # violation -> 2-sentence English explanation
 ├── services/
-│   ├── ingestion.py     # PDF upload -> markdown -> compile -> save
+│   ├── ingestion.py     # policy upload (.pdf/.md) -> text -> compile -> save
 │   └── scanner.py       # Execute approved SQL, log violations (zero LLM)
 └── routes/
     ├── policies.py      # POST /api/v1/policies/upload
@@ -44,7 +44,7 @@ docs/
 | Add response schema | `app/schemas.py` | Need `model_config = {"from_attributes": True}` for ORM |
 | Add PydanticAI agent | `app/agents/` | MUST use `@lru_cache` factory — see compiler.py |
 | Modify scan logic | `app/services/scanner.py` | Pure SQL, zero LLM |
-| Modify PDF ingestion | `app/services/ingestion.py` | `pymupdf4llm.to_markdown()` returns `str \| list[dict]` |
+| Modify ingestion | `app/services/ingestion.py` | Supports `.pdf` (pymupdf4llm) and `.md` (UTF-8 decode) |
 | Change scan interval | `.env` | `SCAN_INTERVAL_MINUTES=5` |
 | Register new router | `app/main.py:58-62` | `app.include_router(r, prefix="/api/v1")` |
 | Background tasks | `app/routes/policies.py` | Manual session via `async_session_factory()` — NOT `Depends(get_db)` |
@@ -68,7 +68,7 @@ docs/
 | `CompilerDeps` | dataclass | `agents/compiler.py:11` | Agent deps — `db_schema_context: str` |
 | `get_compiler_agent` | `@lru_cache` factory | `agents/compiler.py:27` | `Agent[CompilerDeps, list[CompiledRule]]` |
 | `get_explainer_agent` | `@lru_cache` factory | `agents/explainer.py:6` | `Agent[None, str]` |
-| `ingest_policy` | async func | `services/ingestion.py:53` | PDF bytes -> markdown -> compile -> save rules |
+| `ingest_policy` | async func | `services/ingestion.py:53` | policy bytes -> text -> compile -> save rules |
 | `_introspect_db_schema` | async func | `services/ingestion.py:17` | Queries `information_schema.columns`, skips internal tables |
 | `run_deterministic_scan` | async func | `services/scanner.py:12` | Execute approved SQL, dedup by rule_id+record_pk, save violations |
 | `_explain_new_violations` | async func | `services/scanner.py:48` | AI explanations for unexplained violations |
@@ -77,7 +77,7 @@ docs/
 
 ```
 Phase 1: INGESTION (BackgroundTasks)
-  POST /upload -> pymupdf4llm.to_markdown() -> CompilerAgent -> list[CompiledRule] -> DB (status=pending_review)
+POST /upload -> parse policy text (.pdf via pymupdf4llm, .md via decode) -> CompilerAgent -> list[CompiledRule] -> DB (status=pending_review)
 
 Phase 2: HITL (Frontend -> API)
   GET /rules?status=pending_review -> human reviews SQL -> PATCH /rules/{id}/approve -> status=approved
@@ -133,7 +133,7 @@ Scan flow:
 ### FastAPI
 - All routes: `/api/v1/` prefix
 - ORM responses: `model_config = {"from_attributes": True}`
-- PDF ingestion: `BackgroundTasks.add_task()`
+- Policy ingestion: `BackgroundTasks.add_task()`
 
 ## ANTI-PATTERNS
 
@@ -165,6 +165,6 @@ uv add <package>                        # Add dependency
 
 - **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`, `tests/test_violations.py`, `tests/test_scanner.py`, `tests/test_policies.py`). Config in `pyproject.toml` only. 23 tests. No CI/CD.
 - **Docker** — Multi-stage `Dockerfile` (build via `ghcr.io/astral-sh/uv`, runtime via `python:3.13-slim-bookworm`, non-root user) + `docker-compose.yml` with PostgreSQL service.
-- **pymupdf4llm.to_markdown()** returns `str | list[dict]` — runtime type narrowing in ingestion.py handles both
+- **Ingestion formats** — `.pdf` uses `pymupdf4llm.to_markdown()` (`str | list[dict]` handled), `.md` uses UTF-8 decode
 - **Inline imports** in `routes/policies.py` (lines 12, 27) avoid circular deps — intentional
 - **Ruff** cache exists (`.ruff_cache/`) but no config file — run ad-hoc

@@ -14,6 +14,38 @@ logger = logging.getLogger(__name__)
 _INTERNAL_TABLES = frozenset({"policies", "rules", "violations"})
 
 
+def _extract_pdf_text(file_bytes: bytes) -> str:
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        tmp.write(file_bytes)
+        tmp_path = Path(tmp.name)
+
+    try:
+        raw = pymupdf4llm.to_markdown(str(tmp_path))
+        return (
+            raw
+            if isinstance(raw, str)
+            else "\n".join(chunk["text"] for chunk in raw if "text" in chunk)
+        )
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+def _extract_markdown_text(file_bytes: bytes) -> str:
+    try:
+        return file_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return file_bytes.decode("utf-8-sig")
+
+
+def _extract_policy_text(file_bytes: bytes, filename: str) -> str:
+    suffix = Path(filename).suffix.lower()
+    if suffix == ".pdf":
+        return _extract_pdf_text(file_bytes)
+    if suffix in {".md", ".markdown"}:
+        return _extract_markdown_text(file_bytes)
+    raise ValueError("Unsupported file type. Upload a .pdf or .md file.")
+
+
 async def _introspect_db_schema(db: AsyncSession) -> str:
     rows = await db.execute(
         text(
@@ -56,20 +88,6 @@ async def ingest_policy(
     filename: str,
     policy_id: int | None = None,
 ) -> int:
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        tmp.write(file_bytes)
-        tmp_path = Path(tmp.name)
-
-    try:
-        raw = pymupdf4llm.to_markdown(str(tmp_path))
-        markdown_text: str = (
-            raw
-            if isinstance(raw, str)
-            else "\n".join(chunk["text"] for chunk in raw if "text" in chunk)
-        )
-    finally:
-        tmp_path.unlink(missing_ok=True)
-
     policy: Policy
     if policy_id is not None:
         result = await db.execute(select(Policy).where(Policy.id == policy_id))
@@ -91,6 +109,16 @@ async def ingest_policy(
         db.add(policy)
         await db.flush()
         policy_id = policy.id
+
+    policy.status = "processing"
+
+    try:
+        markdown_text = _extract_policy_text(file_bytes, filename)
+    except Exception as e:
+        logger.error("Text extraction failed for policy %d: %s", policy_id, e)
+        policy.status = "failed"
+        await db.commit()
+        return policy_id
 
     policy.markdown_text = markdown_text
     policy.status = "processing"

@@ -1,17 +1,17 @@
 # TraceRule
 
-Deterministic AI compliance compiler. Upload a policy PDF, get PostgreSQL queries that find violations automatically.
+Deterministic AI compliance compiler. Upload a policy file (`.pdf` or `.md`), get PostgreSQL queries that find violations automatically.
 
 The LLM runs once during upload. Every scan after that is pure SQL — deterministic, auditable, zero tokens.
 
 ## How It Works
 
 ```
-PDF Policy ──→ Claude compiles to SQL ──→ Human reviews ──→ Scheduler scans DB
+Policy File ──→ Claude compiles to SQL ──→ Human reviews ──→ Scheduler scans DB
                   (one-time AI)            (approve/reject)    (zero AI, ~2ms/rule)
 ```
 
-1. **Upload** a compliance PDF → Claude Sonnet 4.6 reads the policy text and your database schema, then compiles each enforceable clause into a PostgreSQL SELECT query that returns violating records
+1. **Upload** a compliance policy file (`.pdf` or `.md`) → Claude Sonnet 4.6 reads the policy text and your database schema, then compiles each enforceable clause into a PostgreSQL SELECT query that returns violating records
 2. **Review** each generated SQL rule in the dashboard → approve or reject. Nothing runs without human sign-off
 3. **Scan** runs every 5 minutes via APScheduler → executes approved queries against your database, flags violations, generates plain-English explanations
 
@@ -87,13 +87,13 @@ The frontend starts at [http://localhost:3000](http://localhost:3000). It proxie
 ### 5. Use it
 
 1. Open [http://localhost:3000](http://localhost:3000)
-2. Drop a compliance policy PDF onto the upload area
-3. Wait for compilation (Claude processes the PDF in the background, usually 10-30 seconds)
+2. Drop a compliance policy file (`.pdf` or `.md`) onto the upload area
+3. Wait for compilation (Claude processes the policy text in the background, usually 10-30 seconds)
 4. Review the generated SQL rules — approve or reject each one
 5. Click **Trigger Scan** or wait for the scheduler (every 5 minutes)
 6. View detected violations with AI-generated explanations
 
-**Important:** The compiler introspects your database schema and passes it to Claude so the generated SQL references real tables and columns. If you upload a PDF against an empty database (no tables besides the internal ones), the compiler will have no schema context. Load your business data first, then upload the policy.
+**Important:** The compiler introspects your database schema and passes it to Claude so the generated SQL references real tables and columns. If you upload a policy file against an empty database (no tables besides the internal ones), the compiler will have no schema context. Load your business data first, then upload the policy.
 
 ## Docker Compose
 
@@ -183,10 +183,10 @@ app/
 ├── models.py                # ORM: Policy, Rule, Violation + JSONVariant TypeDecorator
 ├── schemas.py               # Pydantic: CompiledRule (agent output), API request/response
 ├── agents/
-│   ├── compiler.py          # PDF text → list[CompiledRule] via Claude (adaptive thinking, high effort)
+│   ├── compiler.py          # Policy text → list[CompiledRule] via Claude (adaptive thinking, high effort)
 │   └── explainer.py         # Violation → 2-sentence explanation via Claude (medium effort)
 ├── services/
-│   ├── ingestion.py         # PDF upload → markdown → schema introspection → compile → save
+│   ├── ingestion.py         # Policy upload (.pdf/.md) → text → schema introspection → compile → save
 │   └── scanner.py           # Execute approved SQL, dedup by rule_id+record_pk, save violations
 └── routes/
     ├── policies.py          # POST /policies/upload (BackgroundTasks for async compilation)
@@ -200,7 +200,7 @@ frontend/                    # React 19 + Vite + Tailwind v4
 │   ├── types.ts             # TypeScript interfaces matching backend schemas
 │   └── components/
 │       ├── Header.tsx       # Logo, status pill, scan trigger button
-│       ├── UploadPanel.tsx  # Drag-and-drop PDF upload with progress states
+│       ├── UploadPanel.tsx  # Drag-and-drop policy file upload with progress states
 │       ├── ReviewPanel.tsx  # Tabbed rule list (pending / approved / rejected)
 │       ├── RuleCard.tsx     # Single rule card with source quote, SQL, approve/reject
 │       ├── ViolationsPanel.tsx  # Violation list with count badge
@@ -218,7 +218,7 @@ docs/                        # Architecture research, judges document
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/health` | Returns `{"status": "ok"}` |
-| `POST` | `/api/v1/policies/upload` | Upload a PDF (multipart form, field: `file`). Returns `{id, filename, status: "processing"}`. Compilation runs in background. |
+| `POST` | `/api/v1/policies/upload` | Upload a policy file (`.pdf` or `.md`, multipart form field: `file`). Returns `{id, filename, status: "processing"}`. Compilation runs in background. |
 | `GET` | `/api/v1/rules` | List rules. Filters: `?status=pending_review`, `?policy_id=1` |
 | `GET` | `/api/v1/rules/{id}` | Get a single rule |
 | `PATCH` | `/api/v1/rules/{id}/approve` | Approve a rule for scanning |
@@ -233,7 +233,7 @@ docs/                        # Architecture research, judges document
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `DATABASE_URL` | No | `postgresql+asyncpg://postgres:postgres@localhost:5432/tracerule` | PostgreSQL connection string (must use `asyncpg` driver) |
-| `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key for Claude. Required for PDF compilation and violation explanations. Not needed for tests. |
+| `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key for Claude. Required for policy compilation and violation explanations. Not needed for tests. |
 | `SCAN_INTERVAL_MINUTES` | No | `5` | How often APScheduler runs the compliance scan |
 
 ## Stack
@@ -266,7 +266,7 @@ If using a non-default setup, update `DATABASE_URL` in `.env`.
 
 ### `ANTHROPIC_API_KEY` errors
 
-The compiler agent validates the API key at construction time. If the key is missing or invalid, the first PDF upload will fail. The API server itself starts fine without a key — it's only needed when uploading a PDF.
+The compiler agent validates the API key at construction time. If the key is missing or invalid, the first policy upload will fail. The API server itself starts fine without a key — it's only needed when uploading a policy file.
 
 ### Upload succeeds but no rules appear
 
