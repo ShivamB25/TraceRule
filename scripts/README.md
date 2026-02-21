@@ -53,3 +53,31 @@ uv run python scripts/extract_aml_demo.py --profile tiny --budget-gb 0.8
 # Try full small profile but cap to 1.2 GB
 uv run python scripts/extract_aml_demo.py --profile small --budget-gb 1.2
 ```
+
+## Load AML Demo Data Into Postgres
+
+After extracting files into `data/aml_demo`, load them into `transactions` and `accounts` tables:
+
+```bash
+uv run python scripts/load_aml_demo_to_db.py
+```
+
+Default behavior:
+
+- creates `transactions` and `accounts` tables if missing
+- truncates those tables before loading
+- loads up to `250000` transaction rows for quick demo startup
+- loads all account rows
+
+Useful options:
+
+```bash
+# Load more transactions (example: 800k)
+uv run python scripts/load_aml_demo_to_db.py --max-trans-rows 800000
+
+# Load everything from extracted CSVs
+uv run python scripts/load_aml_demo_to_db.py --max-trans-rows 0
+
+# Append instead of truncating
+uv run python scripts/load_aml_demo_to_db.py --no-truncate
+```
