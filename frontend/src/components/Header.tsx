@@ -1,13 +1,24 @@
-import { Radar, Loader2, Activity } from 'lucide-react'
+import { Radar, Loader2, Activity, RefreshCw } from 'lucide-react'
 
 interface HeaderProps {
   scanning: boolean
+  refreshing: boolean
   lastScanCount: number | null
   onScan: () => void
+  onRefresh: () => void
   approvedCount: number
+  lastUpdatedText: string
 }
 
-export default function Header({ scanning, lastScanCount, onScan, approvedCount }: HeaderProps) {
+export default function Header({
+  scanning,
+  refreshing,
+  lastScanCount,
+  onScan,
+  onRefresh,
+  approvedCount,
+  lastUpdatedText,
+}: HeaderProps) {
   const statusText =
     lastScanCount !== null
       ? lastScanCount > 0
@@ -38,10 +49,21 @@ export default function Header({ scanning, lastScanCount, onScan, approvedCount 
         </div>
 
         <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-500">{lastUpdatedText}</span>
           <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${statusColor}`}>
             <Activity className="h-3.5 w-3.5" />
             {statusText}
           </span>
+
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={refreshing}
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-200 outline-none transition-all duration-200 hover:bg-slate-700 focus-visible:ring-4 focus-visible:ring-slate-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
 
           <button
             type="button"

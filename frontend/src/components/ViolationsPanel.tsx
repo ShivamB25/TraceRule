@@ -5,12 +5,23 @@ import ViolationCard from './ViolationCard'
 interface ViolationsPanelProps {
   violations: Violation[]
   rules: Rule[]
+  selectedStatus: 'all' | 'open' | 'resolved'
+  selectedRuleId: number | 'all'
+  onStatusChange: (value: 'all' | 'open' | 'resolved') => void
+  onRuleChange: (value: number | 'all') => void
 }
 
-export default function ViolationsPanel({ violations, rules }: ViolationsPanelProps) {
+export default function ViolationsPanel({
+  violations,
+  rules,
+  selectedStatus,
+  selectedRuleId,
+  onStatusChange,
+  onRuleChange,
+}: ViolationsPanelProps) {
   return (
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[0_24px_60px_-45px_rgba(15,23,42,1)]">
-      <div className="mb-4">
+      <div className="mb-4 space-y-3">
         <div className="mb-1 flex items-center gap-3">
           <h2 className="text-lg font-semibold text-white">Detected Violations</h2>
           {violations.length > 0 && (
@@ -20,6 +31,38 @@ export default function ViolationsPanel({ violations, rules }: ViolationsPanelPr
           )}
         </div>
         <p className="text-xs text-slate-500">Scan results — SQL executed against the transactions database. Zero LLM.</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            Status
+            <select
+              value={selectedStatus}
+              onChange={(e) => onStatusChange(e.target.value as 'all' | 'open' | 'resolved')}
+              className="rounded-md border border-slate-600 bg-slate-800 px-2 py-1 text-xs text-slate-200 outline-none"
+            >
+              <option value="all">All</option>
+              <option value="open">Open</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </label>
+
+          <label className="flex items-center gap-2 text-xs text-slate-400">
+            Rule
+            <select
+              value={selectedRuleId === 'all' ? 'all' : String(selectedRuleId)}
+              onChange={(e) =>
+                onRuleChange(e.target.value === 'all' ? 'all' : Number(e.target.value))
+              }
+              className="max-w-72 rounded-md border border-slate-600 bg-slate-800 px-2 py-1 text-xs text-slate-200 outline-none"
+            >
+              <option value="all">All rules</option>
+              {rules.map((rule) => (
+                <option key={rule.id} value={rule.id}>
+                  #{rule.id} {rule.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
       <div className="space-y-4">

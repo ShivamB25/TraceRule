@@ -31,8 +31,12 @@ export async function rejectRule(id: number): Promise<Rule> {
   return res.json()
 }
 
-export async function getViolations(): Promise<Violation[]> {
-  const res = await fetch(`${BASE}/violations`)
+export async function getViolations(ruleId?: number, status?: string): Promise<Violation[]> {
+  const params = new URLSearchParams()
+  if (ruleId !== undefined) params.set('rule_id', String(ruleId))
+  if (status) params.set('status', status)
+  const query = params.toString()
+  const res = await fetch(`${BASE}/violations${query ? `?${query}` : ''}`)
   if (!res.ok) throw new Error(`Failed to fetch violations: ${res.status}`)
   return res.json()
 }
