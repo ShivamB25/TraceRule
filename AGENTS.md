@@ -86,6 +86,30 @@ Phase 3: SCAN (APScheduler, zero LLM)
   AsyncIOScheduler -> SELECT approved+deterministic rules -> execute compiled_sql -> save violations -> ExplainerAgent
 ```
 
+## FRONTEND REQUEST FLOW (React)
+
+```
+Page load (App mount):
+  Promise.all([GET /api/v1/rules, GET /api/v1/violations])
+
+Upload flow:
+  POST /api/v1/policies/upload -> returns {id, status="processing"}
+  Background task runs ingest_policy() for SAME policy_id
+  Frontend polls GET /api/v1/rules?policy_id={id} every 3s until rules exist
+
+Review flow:
+  PATCH /api/v1/rules/{id}/approve OR /reject
+  Frontend updates local state for the changed rule
+
+Scan flow:
+  POST /api/v1/scan -> returns {violations_found}
+  Frontend then GET /api/v1/violations
+  If ai_explanation is null, frontend polls violations every 5s
+```
+
+- React dev mode (`StrictMode`) causes duplicate initial GETs on page load; this is expected locally and not a backend bug.
+- Important fix (2026-02-21): background ingestion now updates the existing placeholder policy created by upload route, instead of creating a second policy row. Rule `policy_id` now matches upload response `id`.
+
 ## CONVENTIONS
 
 ### PydanticAI (verified against v0.7+ docs)
