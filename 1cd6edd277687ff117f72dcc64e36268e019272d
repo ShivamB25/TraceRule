@@ -1,0 +1,907 @@
+tests/conftest.py
+  1a196bc84841fc25 5
+  220bb4bd227b8977 8
+  727a16bf478fffb3 28-29
+  c368814f34f3fffd 10,13-15
+  d00a2eabfa105625 1,6-7,9,11,16-17,19-27,32-34
+  003820f9d3119f37 2,4,18,30-31,35-50
+  37f3578b9ac3b792 3,12
+app/config.py
+  b1c46d0d3b83c5b3 1-14
+app/routes/violations.py
+  6641138967e3df50 1-47
+app/__init__.py
+  7685aad38711192f 1
+app/models.py
+  833bb1aab4439898 1-3,5,19-54,56-58
+  64f160cfb1e5a4f8 7-8
+  270e98e14bafd1f3 4,6,9-18
+  a0708ad21082949b 55
+app/database.py
+  d6d780feffc9aed1 1-13
+app/routes/rules.py
+  371e44c0104ed730 2
+  8bf9eea9c5752e13 1,3-93
+app/routes/policies.py
+  f06c635cf52a7832 1-36
+app/main.py
+  40d47848451a02a2 1-62
+pyproject.toml
+  b103264c818a6a60 1-19
+  d61f020a9ec37e89 20-30
+tests/test_rules.py
+  a44918e6e05d3691 1-37
+.env.example
+  858b0289221c6b20 1-3
+AGENTS.md
+  e37e509f6b29a589 71-74
+  5a98cb8f770ec339 77
+  4c4c2dc746f29cfa 2,6,8,10,14,16-19,24,27,30,32,36-37,78,81,84,87-88,133-134,138-139
+  37de5cb3462f9a58 1,3-5,7,9,11-13,15,20-23,25-26,28-29,31,33-35,38-70,75-76,79-80,82-83,85-86,89-132,135-137,140-146
+app/schemas.py
+  7273bc11e173c0f3 1-62
+app/agents/compiler.py
+  57047886cee43a81 2,15,23,27-29,37-40,43-44
+  65c454e7572726a2 1,3-14,16-22,24-26,30-35,41-42
+pytest.ini
+  cd79a5f87f884549 1-3
+app/services/scanner.py
+  2f661cef34663110 23-31,34-36,39,43
+  49325377b8358b91 6
+  45ecc3c9847516b0 73
+  89a2fe3c83c9467e 1-5,7-22,32-33,37-38,40-42,44-72,74-83
+app/agents/explainer.py
+  d37f8ec08d9ee371 1-2,6-8
+  1480a3dac38ff39d 3-5,9-17
+docs/ARCHITECTURE_RESEARCH.md
+  aea1cf5f465d75ef 9
+  f0dc84970cae3997 1-8,10-30,32-40
+  05fdad1d1e6eea22 31
+.gitignore
+  c319d73dad975e5a 1-40
+app/services/ingestion.py
+  174ca3432860ae21 6,14,17-52,78-79
+  84a40a9f25e294f8 63-67
+  5566163c595fd37a 1-5,7-8,10-13,15-16,53-62,68-77,81-100
+  86f6491464b5e03b 80
+  89b907b02fc45f54 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "1cd6edd277687ff117f72dcc64e36268e019272d",
+  "prompts": {
+    "003820f9d3119f37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-d0e468fd-dcf4-4857-b63f-f697d722a501",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 26,
+      "total_deletions": 7,
+      "accepted_lines": 21,
+      "overriden_lines": 0
+    },
+    "02941806e0a6c144": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-e2f50ac4-be01-4118-adb7-00dc8f2b6c7e",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "05fdad1d1e6eea22": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-dbcb682a-6b77-42d4-b701-36bae72881b9",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "0a13fbd4d78f7b42": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-5f0b65be-3ca5-4a91-ab40-cba7c333e8d5",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 22,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "1480a3dac38ff39d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-44936234-f465-4035-a920-c68528e6b075",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 0,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    },
+    "174ca3432860ae21": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-9e843f20-1682-4dc1-8be8-218d0607f63b",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 15,
+      "accepted_lines": 40,
+      "overriden_lines": 0
+    },
+    "1a196bc84841fc25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-ccbbec6b-6747-4da4-8cf0-278bb1090b43",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 19,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "220bb4bd227b8977": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3ee9a08e-dd59-41fc-b917-f0644a9e907c",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "24258d2516f5b76e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-bcb06ed4-0b9f-4ce7-9f84-af5147ba36c8",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "270e98e14bafd1f3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-220df5a5-a23c-4c9f-ba64-5da688455248",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 2,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    },
+    "2f1db8ad5f6a455b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-6b29d517-453d-4fa4-b753-8ff10578f5ce",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 10,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "2f38a50be01ecf8f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-2ef9c938-b862-49cb-8d35-7415783e5ed4",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "2f661cef34663110": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-8fd09553-04ac-4f97-95db-f1a2ff62fb16",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 1,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    },
+    "371e44c0104ed730": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-26d5c61b-3672-45c8-b7f8-21aaa2cfa5ec",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "37de5cb3462f9a58": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-b45bdf86-e3a2-4a71-b6c3-0068cd6b060c",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 124,
+      "total_deletions": 377,
+      "accepted_lines": 117,
+      "overriden_lines": 0
+    },
+    "37f3578b9ac3b792": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-61c2e286-9064-4358-8986-f9a5708732f2",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 19,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "3c8cb2772f850058": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-d80b0359-fba5-4311-b4b7-ca4b07a28549",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "40d47848451a02a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-49380ddd-ab27-44ca-b27f-1525509ffe7d",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 62,
+      "total_deletions": 0,
+      "accepted_lines": 62,
+      "overriden_lines": 0
+    },
+    "45ecc3c9847516b0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-dbf866eb-6633-4f32-923f-503ff8b606aa",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "49325377b8358b91": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-d027cf0f-8316-4f6a-9551-639577e8ada8",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "4b12564fbc2f62b5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-7199e673-7260-461f-affc-cd9923ab1f83",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 4,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "4c4c2dc746f29cfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-e5dfc4af-df02-45d5-b9a5-ccdfa45d7402",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 387,
+      "total_deletions": 0,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    },
+    "5566163c595fd37a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-44ecdaf9-a1f2-4c53-947e-095bef05ce98",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 70,
+      "total_deletions": 0,
+      "accepted_lines": 53,
+      "overriden_lines": 0
+    },
+    "57047886cee43a81": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-a88d310b-f533-4d14-a4e7-8f62a61a2a8f",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 28,
+      "total_deletions": 21,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    },
+    "5a98cb8f770ec339": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-2f0a2772-4bb7-4958-8af0-823c5e90369b",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 25,
+      "total_deletions": 23,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "64f160cfb1e5a4f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-999ef95d-02f1-46c0-be30-3d30cda26e26",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "65c454e7572726a2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3050f606-0dbf-4944-a8ef-bd5cb0e952ad",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 37,
+      "total_deletions": 0,
+      "accepted_lines": 31,
+      "overriden_lines": 0
+    },
+    "6641138967e3df50": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-e1ef5724-b23a-4e57-965c-f75d4c2b9eaa",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 47,
+      "total_deletions": 0,
+      "accepted_lines": 47,
+      "overriden_lines": 0
+    },
+    "69d7f89c6b63b39f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-aa28fa2f-6001-4d4b-98b6-dca18c50cb10",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 5,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "7273bc11e173c0f3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-c117438d-4a95-4d29-b9f9-467b9f6e5dde",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 68,
+      "total_deletions": 0,
+      "accepted_lines": 62,
+      "overriden_lines": 0
+    },
+    "727a16bf478fffb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-20842585-52f2-4831-aa7c-e5be37b410ad",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 18,
+      "total_deletions": 4,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "7685aad38711192f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-852290d3-7ba4-4712-b926-d1692ff9a7bd",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "77b365430a78a7c4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-5f746c8f-7b96-403e-bd55-5a2f0e3f08bd",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "786518bf75be58f5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3ac15b18-3889-4bd6-a649-c5604e0bd180",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "78f0336a54fd84dc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-f99c0411-0354-4607-9723-33a80ed02f3f",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "833bb1aab4439898": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-54e9a0f0-7ac0-4d73-81e7-917b653857bb",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 46,
+      "total_deletions": 0,
+      "accepted_lines": 43,
+      "overriden_lines": 0
+    },
+    "84a40a9f25e294f8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3ccd7baf-bf2c-431b-adc6-7d148f6f4115",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 1,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    },
+    "858b0289221c6b20": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-582ce37f-4fc4-4294-a117-8c6e8684b0f1",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 0,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    },
+    "86f6491464b5e03b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-b62e5c44-f439-400c-9a2e-7702f5dca1a8",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "89a2fe3c83c9467e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-5c8c07fa-6495-4177-a58d-52a7b6ae0d9c",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 70,
+      "total_deletions": 0,
+      "accepted_lines": 67,
+      "overriden_lines": 0
+    },
+    "89b907b02fc45f54": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-94075ff6-4561-4078-a0b4-7a0b211a197e",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "8bf9eea9c5752e13": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-2175571f-7aa5-4803-98f6-fe1b1bdb1bd8",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 93,
+      "total_deletions": 0,
+      "accepted_lines": 92,
+      "overriden_lines": 0
+    },
+    "9579ff8381f19686": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-12bf8403-97c0-407f-b3de-e346f7b78a8e",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 6,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "a0708ad21082949b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-3ff68389-ac41-4c48-9fd5-86061fe4df03",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "a44918e6e05d3691": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-bb074e16-0b88-47fc-ab53-3e90deb97dce",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 57,
+      "total_deletions": 0,
+      "accepted_lines": 37,
+      "overriden_lines": 0
+    },
+    "aea1cf5f465d75ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-0010e94c-c28e-492c-be56-0a3ed2a681c2",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "b08bca2005b04a1f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-be038f37-2ae5-4168-9478-c7099b2949d1",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 10,
+      "total_deletions": 2,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "b103264c818a6a60": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-0127d33f-7953-4be5-a21f-c67ebc639d3a",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 0,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    },
+    "b1c46d0d3b83c5b3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-b637158b-6a44-4483-addb-d5ce49e9220e",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 0,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    },
+    "b7db4330b6bdb3cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-13fce148-44cf-4ba5-b4ff-c8540686d923",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 36,
+      "total_deletions": 27,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "c319d73dad975e5a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-e5f71e2f-99b0-49af-b08b-5816dc537734",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 43,
+      "total_deletions": 0,
+      "accepted_lines": 40,
+      "overriden_lines": 0
+    },
+    "c368814f34f3fffd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-a9fd23ac-4e6f-4f16-b41a-f00bb2ef4a3e",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 1,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "cd79a5f87f884549": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-22a8294b-0586-4b1d-a0ab-efb0a8ae64ce",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 0,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    },
+    "d00a2eabfa105625": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-b1129000-aded-4f6a-a00c-fbaa463628ea",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 32,
+      "total_deletions": 0,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    },
+    "d2439fb29ae92a71": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-0629f475-25d9-43a5-8498-867a15b69e29",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "d37f8ec08d9ee371": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-9e728bed-c875-473c-80e8-2b163fc775d6",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 10,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    },
+    "d61f020a9ec37e89": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-28c782fb-ef15-454b-b104-c0237e0c6fc6",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 11,
+      "total_deletions": 0,
+      "accepted_lines": 11,
+      "overriden_lines": 0
+    },
+    "d6d780feffc9aed1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-8b8ade2f-7603-4243-a6b8-1289523d18fb",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 0,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    },
+    "e37e509f6b29a589": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-520d3149-4d3c-45d3-a7ec-303248244f9a",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 3,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "ecb8fb2c4d91dafd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-39c29961-b92c-4cde-a183-c8c5992dd6aa",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 3,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "ed702b26417b4c4b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-785d792a-68e7-49d7-98da-1b55d059e13c",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "f06c635cf52a7832": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-c434cc6e-f9e6-4f94-8b31-2ddf48e72f91",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 36,
+      "total_deletions": 0,
+      "accepted_lines": 36,
+      "overriden_lines": 0
+    },
+    "f0dc84970cae3997": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f254a24ffe9c76634rD22uvt-f7d1363a-d5d5-48f4-90f3-6c45170b8fd9",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 0,
+      "accepted_lines": 38,
+      "overriden_lines": 0
+    },
+    "fbfa19858ad7304b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37f29ac43ffeVdWl6ERkMcImKT-4ede279b-3761-41ff-a470-85c67ad7dde9",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
