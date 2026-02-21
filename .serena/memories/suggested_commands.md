@@ -1,65 +1,47 @@
-# TraceRule — Suggested Commands
+# TraceRule — Commands
 
-## Development
+## Dev server
 ```bash
-# Start dev server (auto-reload)
 uv run uvicorn app.main:app --reload
-
-# API docs
-open http://localhost:8000/docs
+# API docs: http://localhost:8000/docs
 ```
 
-## Dependency Management
+## Dependencies
 ```bash
-# Install all deps (including dev)
-uv sync
-
-# Add production dependency
-uv add <package>
-
-# Add dev dependency
-uv add --dev <package>
+uv sync                  # install all
+uv add <package>         # add production dep
+uv add --dev <package>   # add dev dep
 ```
 
-## Testing
+## Tests
 ```bash
-# Run all tests
-uv run pytest
-
-# Run with verbose output
-uv run pytest -v
-
-# Run specific test file
-uv run pytest tests/test_rules.py
-
-# Run specific test
-uv run pytest tests/test_rules.py::test_list_rules_empty
+uv run pytest            # all tests
+uv run pytest -v         # verbose
+uv run pytest tests/test_rules.py::test_list_rules_empty  # single test
 ```
 
 ## Database
 ```bash
-# Create PostgreSQL database
 createdb tracerule
-
-# Tables are auto-created via Base.metadata.create_all() in lifespan — no migrations needed
+# Tables auto-created via Base.metadata.create_all() in lifespan
 ```
 
-## Linting (Ruff — no config file, run ad-hoc)
+## Linting (no config file)
 ```bash
-uv run ruff check app/
-uv run ruff format app/
+uv run ruff check app/ tests/
+uv run ruff format app/ tests/
 ```
 
-## Environment Setup
+## Docker
 ```bash
 cp .env.example .env
-# Then set ANTHROPIC_API_KEY in .env
+export ANTHROPIC_API_KEY=your_key
+docker compose up --build
+# API: http://localhost:8000/docs
 ```
 
-## System Utils (macOS/Darwin)
+## Environment
 ```bash
-git status / git diff / git log
-ls -la
-find . -name "*.py"
-grep -r "pattern" app/
+cp .env.example .env
+# Set ANTHROPIC_API_KEY in .env
 ```

@@ -139,8 +139,8 @@ uv add <package>                        # Add dependency
 
 ## NOTES
 
-- **No tests** — no pytest, no test files, no CI/CD
-- **No Docker** — no Dockerfile or compose
+- **Tests** — pytest + pytest-asyncio, in-memory SQLite via aiosqlite (`tests/conftest.py`, `tests/test_rules.py`). No CI/CD.
+- **Docker** — `Dockerfile` + `docker-compose.yml` with PostgreSQL service. `DOCKER_DATABASE_URL` overrides DB host inside containers.
 - **pymupdf4llm.to_markdown()** returns `str | list[dict]` — runtime type narrowing in ingestion.py handles both
 - **Inline imports** in `routes/policies.py` (lines 12, 27) avoid circular deps — intentional
 - **Ruff** cache exists (`.ruff_cache/`) but no config file — run ad-hoc
