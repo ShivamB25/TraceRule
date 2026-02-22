@@ -299,7 +299,11 @@ async def _scan_semantic_v3(
       BM25 text search on company_records finds candidates.
       Each candidate is evaluated by the adversarial courtroom.
     """
-    logic_tree = LogicNode.model_validate(rule_row["logic_tree_json"])
+    logic_tree_raw = rule_row["logic_tree_json"]
+    if isinstance(logic_tree_raw, str):
+        logic_tree = LogicNode.model_validate_json(logic_tree_raw)
+    else:
+        logic_tree = LogicNode.model_validate(logic_tree_raw)
     rubrics = _collect_semantic_rubrics(logic_tree)
     if not rubrics:
         return 0
@@ -312,10 +316,13 @@ async def _scan_semantic_v3(
         # Mixed rule — SQL pre-filter (IS_VAGUE compiled to 1=1 → superset)
         try:
             candidate_result = await db.execute(text(compiled_sql))
-            candidate_rows = [
-                {"id": r.get("id"), "data_payload": _make_json_safe(dict(r))}
-                for r in candidate_result.mappings().all()
-            ]
+            candidate_rows: list[dict] = []
+            for r in candidate_result.mappings():
+                candidate_rows.append(
+                    {"id": r.get("id"), "data_payload": _make_json_safe(dict(r))}
+                )
+                if len(candidate_rows) >= settings.semantic_candidate_limit_per_rule:
+                    break
         except Exception as e:
             logger.exception(
                 "SQL pre-filter failed for rule %d: %s — falling back to BM25",
@@ -330,6 +337,15 @@ async def _scan_semantic_v3(
         candidate_rows = await _find_bm25_candidates(
             db, rule_row["target_table"], combined_rubric
         )
+
+    if len(candidate_rows) > settings.semantic_candidate_limit_per_rule:
+        candidate_rows = candidate_rows[: settings.semantic_candidate_limit_per_rule]
+
+    logger.info(
+        "Semantic scan rule %d candidate cap applied: %d row(s)",
+        rule_pk,
+        len(candidate_rows),
+    )
 
     if not candidate_rows:
         return 0

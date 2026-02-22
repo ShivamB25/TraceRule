@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock
+from types import SimpleNamespace
 
 from app.models import CompanyRecord, Policy, V3Rule
 from app.services.scanner import run_v3_scan
@@ -129,3 +130,60 @@ async def test_v3_scan_endpoint_returns_structure(async_client):
     assert "deterministic_violations" in data
     assert "semantic_violations" in data
     assert "total" in data
+
+
+@pytest.mark.asyncio
+async def test_v3_scan_semantic_candidates_are_capped(db_session, monkeypatch):
+    policy = Policy(
+        filename="semantic.pdf", markdown_text="Semantic test", status="completed"
+    )
+    db_session.add(policy)
+    await db_session.flush()
+
+    rule = V3Rule(
+        policy_id=policy.id,
+        rule_id="SEM-CAP-1",
+        title="Semantic Candidate Cap Rule",
+        source_quote="Subjective AML clause.",
+        target_table="company_records",
+        logic_tree_json={
+            "logic_type": "AND",
+            "children": [
+                {
+                    "subject_column": "name",
+                    "operator": "IS_VAGUE",
+                    "value": None,
+                    "semantic_rubric": "Potentially suspicious narrative.",
+                }
+            ],
+        },
+        requires_semantic_scan=True,
+        compiled_sql="SELECT id FROM company_records ORDER BY id",
+        status="approved",
+    )
+    db_session.add(rule)
+    await db_session.commit()
+
+    for i in range(5):
+        await _seed_company_record(db_session, table_name="company_records", id=100 + i)
+
+    monkeypatch.setattr(
+        "app.services.scanner.settings.semantic_candidate_limit_per_rule", 2
+    )
+
+    async def _fake_semantic_debate(*args, **kwargs):
+        return SimpleNamespace(
+            is_violation=True,
+            confidence_score=0.91,
+            chief_justice_reasoning="Capped semantic verdict",
+        )
+
+    monkeypatch.setattr(
+        "app.services.scanner.run_semantic_debate", _fake_semantic_debate
+    )
+
+    mock_factory = AsyncMock()
+    result = await run_v3_scan(db_session, mock_factory)
+
+    assert result["semantic_violations"] == 2
+    assert result["total"] == 2

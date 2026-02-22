@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     logfire_token: str = ""
     scan_interval_minutes: int = 5
     explanation_model_limit_per_scan: int = 25
+    semantic_candidate_limit_per_rule: int = 200
 
     model_config = {"env_file": ".env"}
 
