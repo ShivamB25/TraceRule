@@ -313,7 +313,7 @@ Plus whatever business tables the company has (employees, transactions, etc.) â€
 | `tests/test_ast_compiler.py` | 23 | All AST operators, logic types, edge cases, boolean handling |
 | `tests/test_v3_rules.py` | 11 | V3 rule CRUD, filters, approve/reject |
 | `tests/test_rules.py` | 10 | V1 rule CRUD, filters, approve/reject |
-| `tests/test_v3_scanner.py` | 7 | V3 scanner, bad SQL, dedup, endpoint |
+| `tests/test_v3_scanner.py` | 8 | V3 scanner, bad SQL, dedup, endpoint |
 | `tests/test_violations.py` | 7 | V1 violation CRUD, filters |
 | `tests/test_v3_violations.py` | 6 | V3 violation CRUD, filters |
 | `tests/test_policies.py` | 5 | V1 upload, missing file, health |

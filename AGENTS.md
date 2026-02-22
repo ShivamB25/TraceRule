@@ -35,7 +35,7 @@ app/
 │   ├── ingestion.py     # V1 ingest_policy() + V3 ingest_policy_v3() with global ontology + chunking
 │   └── scanner.py       # V1 run_deterministic_scan() + V3 run_v3_scan() with 3-path routing
 ├── routes/              # V1 endpoints (/api/v1/)
-│   ├── policies.py      # POST /policies/upload
+│   ├── policies.py      # POST /api/v1/policies/upload
 │   ├── rules.py         # GET/PATCH rules
 │   └── violations.py    # GET violations, POST /scan
 └── api/                 # V3 endpoints (/api/v3/)
@@ -51,7 +51,7 @@ tests/                   # 78 tests, pytest + pytest-asyncio, in-memory SQLite v
 ├── test_violations.py   # 7 tests: V1 violation CRUD, filters
 ├── test_v3_policies.py  # 4 tests: V3 upload PDF/MD, 422, 400
 ├── test_v3_rules.py     # 11 tests: V3 rule CRUD, filters, approve/reject
-├── test_v3_scanner.py   # 7 tests: V3 scanner, bad SQL, dedup, endpoint
+├── test_v3_scanner.py   # 8 tests: V3 scanner, bad SQL, dedup, endpoint
 └── test_v3_violations.py # 6 tests: V3 violation CRUD, filters
 
 frontend/                # React 19 + Vite + Tailwind v4

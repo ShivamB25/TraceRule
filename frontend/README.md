@@ -6,9 +6,11 @@ Single-page compliance dashboard. React 19 + TypeScript + Vite + Tailwind CSS v4
 
 ```bash
 cd frontend
-npm install
-npm run dev
+bun install
+bun run dev
 ```
+
+If you prefer npm, `npm install && npm run dev` works too.
 
 Runs on [http://localhost:3000](http://localhost:3000). The Vite dev server proxies `/api` requests to the backend at `localhost:8000`.
 
@@ -32,6 +34,7 @@ Three panels, top to bottom:
 - React 19, no router (single page, tab-based navigation via state)
 - Tailwind CSS v4, dark theme, no CSS modules
 - Vanilla `fetch()` in `api.ts`, no axios or React Query
+- Zod validation for API response shapes at runtime
 - All state in `App.tsx` via `useState`, no external state management
 - Icons from `lucide-react`
 - Fonts: Space Grotesk (headings), IBM Plex Sans (body)
@@ -62,8 +65,10 @@ src/
 ## Commands
 
 ```bash
-npm run dev       # Dev server on :3000
-npm run build     # Type-check + production build
-npm run lint      # ESLint
-npm run preview   # Preview production build
+bun run dev       # Dev server on :3000
+bun run build     # Type-check + production build
+bun run lint      # ESLint
+bun run preview   # Preview production build
+bun run test      # Unit tests (Vitest)
+bun run test:e2e  # End-to-end tests (Playwright)
 ```

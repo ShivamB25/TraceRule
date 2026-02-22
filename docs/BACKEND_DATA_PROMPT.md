@@ -187,8 +187,8 @@ curl -X PATCH http://localhost:8000/api/v3/rules/1/approve
 # Trigger V3 scan
 curl -X POST http://localhost:8000/api/v3/scan | python -m json.tool
 
-# Inspect V3 violations
-curl http://localhost:8000/api/v3/violations | python -m json.tool
+# Inspect V3 violations (paginated wrapper)
+curl "http://localhost:8000/api/v3/violations?limit=25&offset=0" | python -m json.tool
 ```
 
 You should see scan output shaped like:
@@ -201,17 +201,24 @@ You should see scan output shaped like:
 }
 ```
 
-And violation rows shaped like:
+And V3 violations endpoint shaped like:
 
 ```json
 {
-  "id": 1,
-  "v3_rule_id": 2,
-  "record_id": 123,
-  "violation_data": {"...": "..."},
-  "verdict_reasoning": "...",
-  "confidence_score": 0.84,
-  "status": "open"
+  "items": [
+    {
+      "id": 1,
+      "v3_rule_id": 2,
+      "record_id": 123,
+      "violation_data": {"...": "..."},
+      "verdict_reasoning": "...",
+      "confidence_score": 0.84,
+      "status": "open"
+    }
+  ],
+  "total_count": 1,
+  "limit": 25,
+  "offset": 0
 }
 ```
 

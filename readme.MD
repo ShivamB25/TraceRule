@@ -202,7 +202,7 @@ uv run pytest tests/test_rules.py::test_approve_rule
 | `test_ast_compiler.py` | 23 | All AST operators, logic types, edge cases |
 | `test_v3_rules.py` | 11 | V3 rule CRUD, filters, approve/reject |
 | `test_rules.py` | 10 | V1 rule CRUD, filters, approve/reject |
-| `test_v3_scanner.py` | 7 | V3 scanner, bad SQL, dedup, endpoint |
+| `test_v3_scanner.py` | 8 | V3 scanner, bad SQL, dedup, endpoint |
 | `test_violations.py` | 7 | V1 violation CRUD, filters |
 | `test_v3_violations.py` | 6 | V3 violation CRUD, filters |
 | `test_policies.py` | 5 | V1 upload, missing file, health |
@@ -242,7 +242,7 @@ app/
 │   ├── ingestion.py     # V1 ingest_policy() + V3 ingest_policy_v3() with global ontology + chunking
 │   └── scanner.py       # V1 run_deterministic_scan() + V3 run_v3_scan() with 3-path routing
 ├── routes/              # V1 endpoints (/api/v1/)
-│   ├── policies.py      # POST /policies/upload
+│   ├── policies.py      # POST /api/v1/policies/upload
 │   ├── rules.py         # GET/PATCH rules
 │   └── violations.py    # GET violations, POST /scan
 └── api/                 # V3 endpoints (/api/v3/)

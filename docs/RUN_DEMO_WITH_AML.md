@@ -71,8 +71,8 @@ curl -X PATCH http://localhost:8000/api/v3/rules/1/approve
 # Trigger V3 scan (deterministic + courtroom for vague clauses)
 curl -X POST http://localhost:8000/api/v3/scan | python -m json.tool
 
-# View V3 violations with confidence scores
-curl http://localhost:8000/api/v3/violations | python -m json.tool
+# View V3 violations with confidence scores (paginated response)
+curl "http://localhost:8000/api/v3/violations?limit=25&offset=0" | python -m json.tool
 ```
 
 V3 differences to highlight for judges:

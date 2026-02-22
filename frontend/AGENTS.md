@@ -14,7 +14,7 @@ Single-page compliance dashboard for TraceRule. React 19 + TypeScript 5.9 + Vite
 frontend/
 ├── src/
 │   ├── main.tsx           # Entry point (StrictMode + createRoot)
-│   ├── App.tsx            # Root component — ALL state, polling, handlers (360 lines)
+│   ├── App.tsx            # Root component — ALL state, polling, handlers (401 lines)
 │   ├── api.ts             # Fetch-based API client (6 functions, base=/api/v3)
 │   ├── types.ts           # TypeScript interfaces (Rule, Violation, PolicyUploadResponse, ScanResult)
 │   ├── index.css          # Tailwind import + custom fonts + scrollbar
@@ -31,7 +31,7 @@ frontend/
 │       ├── ViolationCard.tsx  # Individual violation with courtroom verdict
 │       ├── SeverityBadge.tsx  # CRITICAL/HIGH/MEDIUM/LOW badge
 │       └── SqlBlock.tsx       # SQL code display
-├── vite.config.ts         # React plugin, Tailwind plugin, port 3000, /api proxy → :8000
+├── vite.config.ts         # React plugin, @tailwindcss/vite plugin, port 3000, /api proxy → :8000
 ├── eslint.config.js       # Flat config: ts-eslint recommended + react-hooks + react-refresh
 ├── tsconfig.app.json      # strict, noUnusedLocals, noUnusedParameters, erasableSyntaxOnly
 └── package.json           # bun.lock present — use bun for install
