@@ -1,0 +1,36 @@
+docs/RUN_DEMO_WITH_AML.md
+  e7fba025d7b9aca2 124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "8b53968c5729bc9738bd5019712f8b5f29d1e5a4",
+  "prompts": {
+    "1a4bf5a4ba61410f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37ed9abc8ffei5UoTiHbM8MsCA-a632875c-3cdd-4da7-97b3-0ee0b318afec",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 328,
+      "overriden_lines": 0
+    },
+    "e7fba025d7b9aca2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37b90974fffeCmpC6i4h1NtQWA-8c59cb92-26b6-4005-83be-e47266cddaa1",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
