@@ -1,6 +1,6 @@
 # How TraceRule's agents process policy documents
 
-Six Claude agents, two pipelines, one goal: turn legal text into enforceable database queries. No agent talks to another directly. The service layer passes typed Pydantic schemas between them.
+Seven Claude agents, two pipelines, one goal: turn legal text into enforceable database queries. No agent talks to another directly. The service layer passes typed Pydantic schemas between them.
 
 ---
 
@@ -301,7 +301,7 @@ flowchart TD
 
 ## 7. Agent registry
 
-All six agents (seven counting the Lexicon, which is inline), their configurations, and when they fire.
+All seven agents, their configurations, and when they fire.
 
 ```mermaid
 graph TD

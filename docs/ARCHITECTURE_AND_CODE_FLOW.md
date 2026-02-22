@@ -115,7 +115,7 @@ Core ingestion logic:
 Extractor agent behavior:
 
 - File: `app/agents/extractor.py`
-- Model: `claude-sonnet-4-6` with thinking budget of 16000 tokens
+- Model: `claude-sonnet-4-6` with thinking budget of 10000 tokens
 - Output: `list[SymbolicRule]` — each contains a `LogicNode` tree (recursive AND/OR/UNLESS nodes with `Condition` leaves)
 - Dependencies: `ExtractorDeps{db, db_schema_context, global_ontology}`
 - Retries: 4
@@ -174,9 +174,9 @@ Execution logic:
 
 - File: `app/services/scanner.py`
 - Function: `run_v3_scan(db, session_factory)`
-- Routes each approved rule to one of three paths based on `has_vague_conditions`:
+- Routes each approved rule to one of three paths based on `requires_semantic_scan`:
 
-**Path A — Pure Deterministic** (`has_vague_conditions=False`):
+**Path A — Pure Deterministic** (`requires_semantic_scan=False`):
 
 - Function: `_scan_deterministic_v3()`
 - Execute `compiled_sql` → save `V3Violation` rows with `confidence_score=1.0`
@@ -259,25 +259,24 @@ V3 violations trace back through:
 Main file: `frontend/src/App.tsx`
 
 1. Initial load:
-  - `GET /api/v1/rules`
-  - `GET /api/v1/violations`
+  - `Promise.all([GET /api/v3/rules, GET /api/v3/violations])`
 2. Upload:
-  - `POST /api/v1/policies/upload`
-  - poll `GET /api/v1/rules?policy_id={id}` every 3s until rules appear
+  - `POST /api/v3/policies/upload`
+  - poll `GET /api/v3/rules?policy_id={id}` every 3s until rules appear
 3. Review:
-  - approve/reject endpoints update local rule state
+  - `PATCH /api/v3/rules/{id}/approve` or `/reject` → updates local rule state
 4. Scan:
-  - `POST /api/v1/scan`
-  - refresh violations
-5. Explanation polling:
-  - if any `ai_explanation` is null, poll violations every 5s
+  - `POST /api/v3/scan`
+  - refresh violations (paginated, 25 per page)
+5. Violation polling:
+  - if any violation has null `verdict_reasoning`, poll violations every 5s
 
 Observability in UI:
 
 - `RequestTimeline` panel shows lifecycle events
 - Technical mode displays endpoint-level request/response lines
 
-Note: The frontend currently targets V1 endpoints only. V3 frontend (AST visualization, courtroom verdict display, confidence scores) is planned.
+The frontend targets V3 endpoints. It displays logic trees, courtroom verdict reasoning, and confidence scores for semantic violations. Violations are paginated (`{items, total_count, limit, offset}`).
 
 ---
 
@@ -288,7 +287,7 @@ Note: The frontend currently targets V1 endpoints only. V3 frontend (AST visuali
 - Primary model in code: **Claude Sonnet 4.6** (`claude-sonnet-4-6`)
 - V1 Compiler effort: high (adaptive thinking)
 - V1 Explainer effort: medium
-- V3 Extractor: enabled thinking, 16000 token budget
+- V3 Extractor: enabled thinking, 10000 token budget
 - V3 Prosecutor/Defender: enabled thinking, 8000 token budget
 - V3 Chief Justice: enabled thinking, 16000 token budget
 

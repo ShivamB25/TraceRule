@@ -36,7 +36,7 @@ tests/
 ├── test_v3_policies.py  # 4 tests: V3 upload PDF/MD, 422, 400
 ├── test_v3_rules.py     # 11 tests: V3 rule CRUD, filters, approve/reject
 ├── test_v3_scanner.py   # 7 tests: V3 scanner, bad SQL, dedup, endpoint
-└── test_v3_violations.py # 6 tests: V3 violation CRUD, filters (total: 76+1 = 77... actually 76)
+└── test_v3_violations.py # 6 tests: V3 violation CRUD, filters (total: 78)
 ```
 
 ## V1 API Endpoints (prefix: /api/v1/)

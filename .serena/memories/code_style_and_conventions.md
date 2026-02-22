@@ -19,7 +19,7 @@
 - Dynamic prompts: `@agent.system_prompt` with `RunContext[DepsType]`
 - Thinking config: `AnthropicModelSettings(anthropic_thinking={...})`
   - Compiler: `{"type": "adaptive"}`, `anthropic_effort="high"`
-  - Extractor: `{"type": "enabled", "budget_tokens": 16000}`
+  - Extractor: `{"type": "enabled", "budget_tokens": 10000}`, `max_tokens=20000`
   - Courtroom Prosecutor/Defender: `{"type": "enabled", "budget_tokens": 8000}`
   - Courtroom Chief Justice: `{"type": "enabled", "budget_tokens": 16000}`
   - Explainer: `{"type": "adaptive"}`, `anthropic_effort="medium"`

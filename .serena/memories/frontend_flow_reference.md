@@ -1,28 +1,27 @@
 # Frontend flow reference
 
-## Request flow
+## Request flow (V3 endpoints)
 1. Page load
-   - `GET /api/v1/rules`
-   - `GET /api/v1/violations`
+   - `Promise.all([GET /api/v3/rules, GET /api/v3/violations])`
 
 2. Upload
-   - `POST /api/v1/policies/upload`
+   - `POST /api/v3/policies/upload`
    - receive `{id, status=processing}`
 
 3. Compile polling
-   - poll `GET /api/v1/rules?policy_id={id}` every 3s
-   - stop when rules appear
+   - poll `GET /api/v3/rules?policy_id={id}` every 3s
+   - stop when rules appear (max 40 attempts)
 
 4. Human review
-   - `PATCH /api/v1/rules/{id}/approve`
-   - `PATCH /api/v1/rules/{id}/reject`
+   - `PATCH /api/v3/rules/{id}/approve`
+   - `PATCH /api/v3/rules/{id}/reject`
 
 5. Scan
-   - `POST /api/v1/scan`
-   - refresh `GET /api/v1/violations`
+   - `POST /api/v3/scan`
+   - refresh `GET /api/v3/violations` (paginated, 25 per page)
 
-6. Explanation polling
-   - if any violation has `ai_explanation=null`, poll violations every 5s
+6. Violation polling
+   - if any violation has null `verdict_reasoning`, poll violations every 5s
 
 ## Current UI features
 - Manual refresh button in header

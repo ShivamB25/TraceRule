@@ -33,7 +33,7 @@ POST /api/v3/policies/upload
     4. _chunk_policy_text() → overlapping chunks (4000 chars, 500 overlap)
     5. For each chunk:
        → get_extractor_agent().run(chunk, deps=ExtractorDeps{db, schema, ontology})
-       → Claude claude-sonnet-4-6 (enabled thinking, 16000 budget)
+       → Claude claude-sonnet-4-6 (enabled thinking, 10000 budget, max 20000 tokens)
        → @output_validator: compile_ast_to_sql() → EXPLAIN test SQL in sandboxed transaction
        → On failure: ModelRetry with Postgres stack trace → Claude self-heals
        → list[SymbolicRule] → V3Rule ORM objects (logic_tree_json, compiled_sql, status=pending_review)

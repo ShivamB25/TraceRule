@@ -2,7 +2,7 @@
 
 After any coding task, verify:
 
-## 1. Tests (76 total)
+## 1. Tests (78 total)
 ```bash
 uv run pytest -v
 ```

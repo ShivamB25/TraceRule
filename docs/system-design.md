@@ -96,13 +96,15 @@ Same as V1. The compliance officer sees each rule with its logic tree visualizat
 
 V3 classifies each approved rule and routes it to the appropriate scan path:
 
-**Path A — Pure Deterministic** (no IS_VAGUE conditions in the tree)
+V3 classifies each approved rule via `requires_semantic_scan` and routes it:
+
+**Path A — Pure Deterministic** (`requires_semantic_scan=False`)
 Same as V1. Execute compiled SQL. Save violations with `confidence=1.0`. Done.
 
-**Path B — Mixed Rules** (deterministic + IS_VAGUE conditions)
+**Path B — Mixed Rules** (`requires_semantic_scan=True`, compiled SQL exists)
 The compiled SQL has `1=1` where IS_VAGUE conditions appear, producing a *superset* of potential violators. Each candidate from this superset goes to the adversarial courtroom for evaluation. If the SQL pre-filter fails, the scanner falls back to BM25.
 
-**Path C — Pure Vague Rules** (only IS_VAGUE conditions)
+**Path C — Pure Vague Rules** (`requires_semantic_scan=True`, no compiled SQL)
 No useful SQL exists. The scanner runs BM25 text search using Postgres-native `ts_rank` + `websearch_to_tsquery` on the `company_records` table. No pgvector. No embeddings. No external search engine. Top candidates go to the courtroom.
 
 #### The Adversarial Courtroom
@@ -273,9 +275,9 @@ The DERECHA paper (IEEE Transactions on Software Engineering, 2023) found that d
 
 | Table | Purpose |
 |-------|---------|
-| `company_records` | Business data for BM25 search: `id, source_table, record_data (JSONB), search_text, ts_vector (GIN-indexed)` |
-| `v3_rules` | V3 rules with logic trees: `id, policy_id, title, source_quote, severity, logic_tree_json (JSONB), compiled_sql, has_vague_conditions, status, created_at` |
-| `v3_violations` | V3 violations with confidence: `id, rule_id, record_id, violating_data (JSONB), confidence_score, verdict_reasoning, status, detected_at` + unique dedup index |
+| `company_records` | Business data for BM25 search: `id, table_name, data_payload (JSONB), search_text, ts_vector (GIN-indexed)` |
+| `v3_rules` | V3 rules with logic trees: `id, policy_id, rule_id, title, source_quote, severity, target_table, logic_tree_json (JSONB), requires_semantic_scan, compiled_sql, status, created_at` |
+| `v3_violations` | V3 violations with confidence: `id, v3_rule_id, record_id, violation_data (JSONB), verdict_reasoning, confidence_score, status, detected_at` + unique dedup index on `(v3_rule_id, record_id)` |
 
 Plus whatever business tables the company has (employees, transactions, etc.) — TraceRule discovers them via `information_schema` and writes SQL against them.
 
@@ -304,19 +306,19 @@ Plus whatever business tables the company has (employees, transactions, etc.) �
 
 ### Test Suite
 
-76 tests across 10 files. In-memory SQLite via aiosqlite (Postgres compatibility handled by `JSONVariant` and `TSVectorVariant` TypeDecorators). Tests run without a database server, without an API key, without any external service.
+78 tests across 10 files. In-memory SQLite via aiosqlite (Postgres compatibility handled by `JSONVariant` and `TSVectorVariant` TypeDecorators). Tests run without a database server, without an API key, without any external service.
 
 | File | Tests | Covers |
 |---|---|---|
-| `tests/test_rules.py` | 10 | V1 rule CRUD, filtering, approve, reject |
-| `tests/test_violations.py` | 7 | V1 violation CRUD, filtering |
-| `tests/test_scanner.py` | 4 | V1 scanner, bad SQL resilience, explanation limit |
-| `tests/test_policies.py` | 5 | V1 upload, missing file, health |
-| `tests/test_ast_compiler.py` | 23 | All operators, logic types, edge cases, boolean handling |
-| `tests/test_v3_rules.py` | 11 | V3 rule CRUD, filtering, approve, reject |
-| `tests/test_v3_violations.py` | 6 | V3 violation CRUD, filtering |
+| `tests/test_ast_compiler.py` | 23 | All AST operators, logic types, edge cases, boolean handling |
+| `tests/test_v3_rules.py` | 11 | V3 rule CRUD, filters, approve/reject |
+| `tests/test_rules.py` | 10 | V1 rule CRUD, filters, approve/reject |
 | `tests/test_v3_scanner.py` | 7 | V3 scanner, bad SQL, dedup, endpoint |
+| `tests/test_violations.py` | 7 | V1 violation CRUD, filters |
+| `tests/test_v3_violations.py` | 6 | V3 violation CRUD, filters |
+| `tests/test_policies.py` | 5 | V1 upload, missing file, health |
 | `tests/test_v3_policies.py` | 4 | V3 upload PDF/MD, 422, 400 |
+| `tests/test_scanner.py` | 4 | V1 scanner, bad SQL, explanation limit |
 
 ---
 
@@ -359,11 +361,11 @@ React 19 + Vite + Tailwind v4. Dark theme. Three panels:
 
 1. **Upload Panel** — Drag-and-drop PDF. Shows processing state, then "Compiled N rules from filename.pdf." Polls the backend every 3 seconds until rules appear.
 
-2. **Review Panel** — Tabbed view (Pending / Approved / Rejected) with cards showing title, severity badge, the exact source quote from the PDF, the compiled SQL, and Approve/Reject buttons. Cards animate out on action.
+2. **Review Panel** — Tabbed view (Pending / Approved / Rejected) with cards showing title, severity badge, source quote, logic tree, target table, semantic/deterministic mode, and Approve/Reject buttons.
 
-3. **Violations Panel** — Scan results. Each violation shows the rule it came from, the primary key of the violating record, the raw data as JSON, and the AI-generated 2-sentence explanation.
+3. **Violations Panel** — Paginated scan results (25 per page). Deterministic violations show record data with `confidence = 1.0`. Semantic violations include courtroom verdict reasoning with confidence scores.
 
-The frontend currently targets V1 endpoints. V3 frontend with AST visualization, courtroom verdict display, and confidence score rendering is planned.
+The frontend targets V3 endpoints (`/api/v3/`). All state lives in `App.tsx` via `useState`. Data fetching uses vanilla `fetch()` in `api.ts`. Violations are paginated: `{items, total_count, limit, offset}`.
 
 ---
 
