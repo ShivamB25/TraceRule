@@ -104,8 +104,8 @@ export async function getViolations(ruleId?: number, status?: ViolationStatus): 
 }
 
 /**
- * Triggers a deterministic scan run.
- * @returns Parsed scan result with count of new violations.
+ * Triggers a V3 scan run.
+ * @returns Parsed scan result split by deterministic vs semantic violations.
  */
 export async function triggerScan(): Promise<ScanResult> {
   const res = await fetch(`${BASE}/scan`, { method: 'POST' })

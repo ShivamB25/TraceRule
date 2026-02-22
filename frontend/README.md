@@ -23,9 +23,9 @@ uv run uvicorn app.main:app --reload
 
 Three panels, top to bottom:
 
-1. **Upload** — drag a compliance policy PDF onto the drop zone. The backend compiles it into SQL rules (usually 10-30 seconds).
-2. **Review** — tabbed list of compiled rules (pending / approved / rejected). Each card shows the source quote from the PDF, the generated SQL, and approve/reject buttons.
-3. **Violations** — scan results after running approved rules against the database. Each violation shows the flagged record data and a two-sentence AI explanation.
+1. **Upload** — drag a compliance policy PDF onto the drop zone. The backend compiles it into V3 rules with logic trees and compiled SQL (usually 10-30 seconds).
+2. **Review** — tabbed list of compiled rules (pending / approved / rejected). Each card shows source quote, logic tree, target table, semantic/deterministic mode, and approve/reject controls.
+3. **Violations** — scan results after running approved rules. Deterministic violations show record data, and semantic violations include courtroom verdict reasoning with confidence.
 
 ## Stack
 
@@ -41,7 +41,7 @@ Three panels, top to bottom:
 ```
 src/
 ├── App.tsx              # Root component: all state, polling, handlers
-├── api.ts               # Typed fetch wrappers for /api/v1 endpoints
+├── api.ts               # Typed fetch wrappers for /api/v3 endpoints
 ├── types.ts             # TypeScript interfaces matching backend schemas
 ├── index.css            # Tailwind import + custom fonts
 └── components/
@@ -53,7 +53,7 @@ src/
     ├── ReviewPanel.tsx      # Tabbed rule review
     ├── RuleCard.tsx         # Single rule with approve/reject
     ├── ViolationsPanel.tsx  # Violation list
-    ├── ViolationCard.tsx    # Single violation with explanation
+    ├── ViolationCard.tsx    # Single violation with verdict reasoning/confidence
     ├── SeverityBadge.tsx    # CRITICAL/HIGH/MEDIUM/LOW badge
     └── SqlBlock.tsx         # SQL code display
 ```
