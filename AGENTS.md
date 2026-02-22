@@ -90,20 +90,20 @@ Phase 3: SCAN (APScheduler, zero LLM)
 
 ```
 Page load (App mount):
-  Promise.all([GET /api/v1/rules, GET /api/v1/violations])
+  Promise.all([GET /api/v3/rules, GET /api/v3/violations])
 
 Upload flow:
-  POST /api/v1/policies/upload -> returns {id, status="processing"}
+  POST /api/v3/policies/upload -> returns {id, status="processing"}
   Background task runs ingest_policy() for SAME policy_id
-  Frontend polls GET /api/v1/rules?policy_id={id} every 3s until rules exist
+  Frontend polls GET /api/v3/rules?policy_id={id} every 3s until rules exist
 
 Review flow:
-  PATCH /api/v1/rules/{id}/approve OR /reject
+  PATCH /api/v3/rules/{id}/approve OR /reject
   Frontend updates local state for the changed rule
 
 Scan flow:
-  POST /api/v1/scan -> returns {violations_found}
-  Frontend then GET /api/v1/violations
+  POST /api/v3/scan -> returns {violations_found}
+  Frontend then GET /api/v3/violations
   If ai_explanation is null, frontend polls violations every 5s
 ```
 

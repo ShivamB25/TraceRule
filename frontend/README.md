@@ -45,9 +45,11 @@ src/
 ├── types.ts             # TypeScript interfaces matching backend schemas
 ├── index.css            # Tailwind import + custom fonts
 └── components/
+    ├── ErrorBoundary.tsx     # Render error boundary with retry
     ├── Header.tsx           # Top nav, scan trigger, status
     ├── UploadPanel.tsx      # PDF drag-and-drop upload
     ├── PipelineStrip.tsx    # 3-phase pipeline visualization
+    ├── StatsBar.tsx         # Rule/violation counters
     ├── StatsBar.tsx         # Rule/violation counters
     ├── RequestTimeline.tsx  # Live API request log
     ├── ReviewPanel.tsx      # Tabbed rule review
