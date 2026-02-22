@@ -15,5 +15,12 @@ If the same source account sends transfers to the same destination account more 
 ### 5) Explicit laundering-tag escalation
 Any transaction marked as laundering by upstream monitoring signals must be flagged for immediate investigation.
 
-### 6) Subjective analyst review clause
-Transactions with unusual narrative context that cannot be captured through deterministic fields should be escalated for analyst judgment.
+### 6) Subjective analyst review clause (V3 courtroom path)
+Transactions that appear inconsistent with normal customer behavior, even when no deterministic threshold is crossed, should be escalated for semantic review.
+
+Examples include combinations of factors such as:
+- transfer purpose text that appears evasive or intentionally vague,
+- timing patterns that look staged to avoid reporting,
+- account-to-account movement that appears layered without clear business rationale.
+
+This clause is intentionally subjective and should be evaluated by the V3 adversarial courtroom (Prosecutor, Defender, Chief Justice), not by deterministic SQL alone.

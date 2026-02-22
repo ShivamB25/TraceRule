@@ -2,19 +2,18 @@
 
 Deterministic AI compliance compiler. Upload a policy file (`.pdf` or `.md`), get PostgreSQL queries that find violations automatically.
 
-The LLM runs once during upload. Every scan after that is pure SQL — deterministic, auditable, zero tokens.
+The LLM runs once during upload. Every scan after that is pure SQL: deterministic, auditable, zero tokens.
 
 ## For judges
 
-- Architecture + runtime flow: `docs/ARCHITECTURE_AND_CODE_FLOW.md`x
+- Architecture + runtime flow: `docs/ARCHITECTURE_AND_CODE_FLOW.md`
 - AML demo runbook: `docs/RUN_DEMO_WITH_AML.md`
 - Demo policy content (export to PDF): `docs/AML_POLICY_DEMO_CONTENT.md`
 
-## Model strategy (accurate)
+## Model strategy
 
-- Current implementation uses **gemini pro 3.1 and gemini flash for summarising** for compilation and explanations.
-- If you want cross-model verification during judging, you can run an **optional** secondary review with **Gemini 3.1 Pro (Preview)** or Claude Sonnet 4.5/4.6 outside the core pipeline.
-- The deterministic scan path itself does not call any model.
+- Primary model: **Claude Sonnet 4.6** (`claude-sonnet-4-6`) with adaptive thinking. High effort for compilation, medium effort for explanations.
+- The deterministic scan path does not call any model.
 
 ## How It Works
 

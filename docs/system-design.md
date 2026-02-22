@@ -117,13 +117,13 @@ This is the semantic evaluation layer for subjective clauses. Three Claude agent
 
 Prosecutor and Defender run in parallel via `asyncio.gather`. The Chief Justice runs sequentially after both arguments are in.
 
-This isn't a single LLM call deciding "is this a violation?" — it's adversarial deliberation. The Prosecutor can't just assert. The Defender forces it to justify. The Chief Justice weighs competing arguments. The result is a calibrated confidence score, not a binary yes/no.
+This is adversarial deliberation, not a single LLM call deciding "is this a violation?" The Prosecutor can't just assert. The Defender forces it to justify. The Chief Justice weighs competing arguments. The result is a calibrated confidence score, not a binary yes/no.
 
 ---
 
 ## Why Not pgvector / Embeddings?
 
-We built the V3 pipeline with pgvector initially and removed it. Here's why:
+We built the V3 pipeline with pgvector initially and removed it for four reasons:
 
 1. **Embedding structured data is an anti-pattern.** Business records (expenses, employees, transactions) are tabular. Semantic similarity between a rubric like "Is this gift lavish?" and a JSON row `{amount: 50000, category: "entertainment"}` produces near-zero useful signal.
 

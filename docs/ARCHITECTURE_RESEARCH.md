@@ -40,7 +40,7 @@ Prosecutor and Defender run in parallel via `asyncio.gather`. This adversarial s
 
 ### BM25 over embeddings (pgvector removed)
 
-We initially built V3 with pgvector and embedding-based retrieval. We removed it for five reasons:
+We initially built V3 with pgvector and embedding-based retrieval, then removed it. Five reasons:
 
 1. **Embedding structured data is an anti-pattern.** Business records are tabular. Semantic similarity between "Is this gift lavish?" and `{amount: 50000, category: "entertainment"}` produces near-zero useful signal.
 
