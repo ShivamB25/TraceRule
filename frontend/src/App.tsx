@@ -43,7 +43,6 @@ export default function App() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([])
   const [liveAnnouncement, setLiveAnnouncement] = useState('')
   const initialLoadLoggedRef = useRef(false)
-  const explanationsPendingRef = useRef(false)
 
   const announce = useCallback((message: string): void => {
     setLiveAnnouncement('')
@@ -84,7 +83,7 @@ export default function App() {
           kind: 'info',
           title: 'Dashboard loaded',
           detail: `Fetched ${nextRules.length} rule(s) and ${nextViolations.length} violation(s) from backend`,
-          request: 'GET /api/v1/rules + GET /api/v1/violations',
+          request: 'GET /api/v3/rules + GET /api/v3/violations',
           response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.length}`,
         })
       } else if (showSpinner) {
@@ -92,7 +91,7 @@ export default function App() {
           kind: 'info',
           title: 'Manual refresh complete',
           detail: `Now showing ${nextRules.length} rule(s) and ${nextViolations.length} violation(s)`,
-          request: 'GET /api/v1/rules + GET /api/v1/violations',
+          request: 'GET /api/v3/rules + GET /api/v3/violations',
           response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.length}`,
         })
       }
@@ -103,7 +102,7 @@ export default function App() {
         kind: 'error',
         title: 'Data refresh failed',
         detail: message,
-        request: 'GET /api/v1/rules + GET /api/v1/violations',
+        request: 'GET /api/v3/rules + GET /api/v3/violations',
       })
     } finally {
       if (showSpinner) setRefreshing(false)
@@ -122,7 +121,7 @@ export default function App() {
       kind: 'info',
       title: 'Compilation started',
       detail: `Polling rules for policy #${lastUpload.id}`,
-      request: `GET /api/v1/rules?policy_id=${lastUpload.id} (poll every 3s)`,
+      request: `GET /api/v3/rules?policy_id=${lastUpload.id} (poll every 3s)`,
     })
 
     let attempts = 0
@@ -138,7 +137,7 @@ export default function App() {
             kind: 'success',
             title: 'Rules generated',
             detail: `${newRules.length} rule(s) compiled for policy #${lastUpload.id}`,
-            request: `GET /api/v1/rules?policy_id=${lastUpload.id}`,
+            request: `GET /api/v3/rules?policy_id=${lastUpload.id}`,
             response: `200 OK, count=${newRules.length}`,
           })
           clearInterval(interval)
@@ -151,7 +150,7 @@ export default function App() {
             kind: 'warning',
             title: 'Compilation still running',
             detail: `No rules yet for policy #${lastUpload.id} after 2 minutes`,
-            request: `GET /api/v1/rules?policy_id=${lastUpload.id}`,
+            request: `GET /api/v3/rules?policy_id=${lastUpload.id}`,
             response: '200 OK, count=0',
           })
           clearInterval(interval)
@@ -164,50 +163,6 @@ export default function App() {
 
     return () => clearInterval(interval)
   }, [lastUpload, pushTimeline])
-
-  useEffect(() => {
-    if (!violations.some((violation) => violation.ai_explanation === null)) return
-
-    const interval = setInterval(async () => {
-      try {
-        const fresh = await getViolations(
-          selectedViolationRuleId === 'all' ? undefined : selectedViolationRuleId,
-          selectedViolationStatus === 'all' ? undefined : selectedViolationStatus,
-        )
-        setViolations(fresh)
-        setLastUpdatedAt(new Date())
-        if (!fresh.some((violation) => violation.ai_explanation === null)) {
-          clearInterval(interval)
-        }
-      } catch {
-        return
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [violations, selectedViolationRuleId, selectedViolationStatus])
-
-  useEffect(() => {
-    const hasPending = violations.some((violation) => violation.ai_explanation === null)
-    if (hasPending && !explanationsPendingRef.current) {
-      explanationsPendingRef.current = true
-      pushTimeline({
-        kind: 'info',
-        title: 'Generating explanations',
-        detail: 'Backend is enriching new violations with AI explanations',
-        request: 'GET /api/v1/violations (poll every 5s)',
-      })
-    } else if (!hasPending && explanationsPendingRef.current) {
-      explanationsPendingRef.current = false
-      pushTimeline({
-        kind: 'success',
-        title: 'Explanations ready',
-        detail: 'All visible violations now have AI explanations',
-        request: 'GET /api/v1/violations',
-        response: '200 OK, all ai_explanation fields present',
-      })
-    }
-  }, [pushTimeline, violations])
 
   async function handleUpload(file: File): Promise<void> {
     const name = file.name.toLowerCase()
@@ -231,7 +186,7 @@ export default function App() {
 
     setUploading(true)
     setError(null)
-    pushTimeline({ kind: 'info', title: 'Upload started', detail: file.name, request: 'POST /api/v1/policies/upload' })
+    pushTimeline({ kind: 'info', title: 'Upload started', detail: file.name, request: 'POST /api/v3/policies/upload' })
     try {
       const result = await uploadPolicy(file)
       setLastUpload(result)
@@ -241,13 +196,13 @@ export default function App() {
         kind: 'success',
         title: 'Upload accepted',
         detail: `Policy #${result.id} queued for compilation`,
-        request: 'POST /api/v1/policies/upload',
+        request: 'POST /api/v3/policies/upload',
         response: `200 OK, policy_id=${result.id}, status=processing`,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Upload failed'
       setError(message)
-      pushTimeline({ kind: 'error', title: 'Upload failed', detail: message, request: 'POST /api/v1/policies/upload' })
+      pushTimeline({ kind: 'error', title: 'Upload failed', detail: message, request: 'POST /api/v3/policies/upload' })
     } finally {
       setUploading(false)
     }
@@ -263,13 +218,13 @@ export default function App() {
         kind: 'success',
         title: 'Rule approved',
         detail: `Rule #${id} is now eligible for scan`,
-        request: `PATCH /api/v1/rules/${id}/approve`,
+        request: `PATCH /api/v3/rules/${id}/approve`,
         response: '200 OK, status=approved',
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to approve rule'
       setError(message)
-      pushTimeline({ kind: 'error', title: 'Approve failed', detail: message, request: `PATCH /api/v1/rules/${id}/approve` })
+      pushTimeline({ kind: 'error', title: 'Approve failed', detail: message, request: `PATCH /api/v3/rules/${id}/approve` })
     }
   }
 
@@ -283,23 +238,23 @@ export default function App() {
         kind: 'warning',
         title: 'Rule rejected',
         detail: `Rule #${id} removed from scan path`,
-        request: `PATCH /api/v1/rules/${id}/reject`,
+        request: `PATCH /api/v3/rules/${id}/reject`,
         response: '200 OK, status=rejected',
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to reject rule'
       setError(message)
-      pushTimeline({ kind: 'error', title: 'Reject failed', detail: message, request: `PATCH /api/v1/rules/${id}/reject` })
+      pushTimeline({ kind: 'error', title: 'Reject failed', detail: message, request: `PATCH /api/v3/rules/${id}/reject` })
     }
   }
 
   async function handleScan(): Promise<void> {
     setScanning(true)
     setError(null)
-    pushTimeline({ kind: 'info', title: 'Manual scan started', detail: 'Calling POST /api/v1/scan', request: 'POST /api/v1/scan' })
+    pushTimeline({ kind: 'info', title: 'Manual scan started', detail: 'Calling POST /api/v3/scan', request: 'POST /api/v3/scan' })
     try {
       const result = await triggerScan()
-      setLastScanCount(result.violations_found)
+      setLastScanCount(result.total)
       const fresh = await getViolations(
         selectedViolationRuleId === 'all' ? undefined : selectedViolationRuleId,
         selectedViolationStatus === 'all' ? undefined : selectedViolationStatus,
@@ -307,16 +262,16 @@ export default function App() {
       setViolations(fresh)
       setLastUpdatedAt(new Date())
       pushTimeline({
-        kind: result.violations_found > 0 ? 'warning' : 'success',
+        kind: result.total > 0 ? 'warning' : 'success',
         title: 'Scan completed',
-        detail: `${result.violations_found} new violation(s) found`,
-        request: 'POST /api/v1/scan -> GET /api/v1/violations',
-        response: `200 OK, violations_found=${result.violations_found}`,
+        detail: `${result.total} total violation(s): deterministic=${result.deterministic_violations}, semantic=${result.semantic_violations}`,
+        request: 'POST /api/v3/scan -> GET /api/v3/violations',
+        response: `200 OK, total=${result.total}`,
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Scan failed'
       setError(message)
-      pushTimeline({ kind: 'error', title: 'Scan failed', detail: message, request: 'POST /api/v1/scan' })
+      pushTimeline({ kind: 'error', title: 'Scan failed', detail: message, request: 'POST /api/v3/scan' })
     } finally {
       setScanning(false)
     }
@@ -341,7 +296,7 @@ export default function App() {
             kind: 'info',
             title: 'Manual refresh started',
             detail: 'Refreshing rules and violations',
-            request: 'GET /api/v1/rules + GET /api/v1/violations',
+            request: 'GET /api/v3/rules + GET /api/v3/violations',
           })
           void refreshData(true)
         }}

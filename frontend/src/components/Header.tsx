@@ -44,7 +44,7 @@ export default function Header({
             <h1 className="text-xl font-bold tracking-tight text-white">
               TraceRule <span className="font-normal text-slate-400">Data Policy Compliance Agent</span>
             </h1>
-            <p className="text-xs text-slate-400">Upload policy PDFs. Approve SQL checks. Detect violations in company data with deterministic scans.</p>
+            <p className="text-xs text-slate-400">Upload policy PDFs. Approve neuro-symbolic rules. Detect deterministic and semantic violations with courtroom-backed confidence.</p>
           </div>
         </div>
 
@@ -72,7 +72,7 @@ export default function Header({
             onClick={onScan}
             disabled={scanning || approvedCount === 0}
             aria-busy={scanning}
-            aria-label={scanning ? 'Running deterministic scan' : 'Trigger deterministic scan'}
+            aria-label={scanning ? 'Running V3 scan' : 'Trigger V3 scan'}
             className="flex min-h-11 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-[var(--shadow-button)] outline-none transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-500 focus-visible:ring-4 focus-visible:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {scanning ? (
@@ -80,7 +80,7 @@ export default function Header({
             ) : (
               <Radar className="h-4 w-4" />
             )}
-            {scanning ? 'Scanning...' : 'Trigger Scan'}
+            {scanning ? 'Scanning...' : 'Trigger V3 Scan'}
           </button>
         </div>
       </div>

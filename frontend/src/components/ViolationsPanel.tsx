@@ -32,7 +32,7 @@ export default function ViolationsPanel({
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500">Scan results from deterministic SQL checks executed against your `transactions` and related data tables.</p>
+        <p className="text-xs text-slate-500">Scan results from V3 engine: deterministic SQL checks plus courtroom-evaluated semantic violations.</p>
         <div className="flex flex-wrap items-center gap-3">
           <label htmlFor="violation-status-filter" className="flex items-center gap-2 text-xs text-slate-400">
             Status
@@ -49,7 +49,7 @@ export default function ViolationsPanel({
           </label>
 
           <label htmlFor="violation-rule-filter" className="flex items-center gap-2 text-xs text-slate-400">
-            Rule
+            V3 Rule
             <select
               id="violation-rule-filter"
               value={selectedRuleId === 'all' ? 'all' : String(selectedRuleId)}

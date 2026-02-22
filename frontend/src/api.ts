@@ -15,7 +15,7 @@ import type {
   ViolationStatus,
 } from './types'
 
-const BASE = '/api/v1'
+const BASE = '/api/v3'
 
 async function parseJsonResponse<T>(res: Response, parser: (data: unknown) => T): Promise<T> {
   let data: unknown
@@ -95,7 +95,7 @@ export async function rejectRule(id: number): Promise<Rule> {
  */
 export async function getViolations(ruleId?: number, status?: ViolationStatus): Promise<Violation[]> {
   const params = new URLSearchParams()
-  if (ruleId !== undefined) params.set('rule_id', String(ruleId))
+  if (ruleId !== undefined) params.set('v3_rule_id', String(ruleId))
   if (status) params.set('status', status)
   const query = params.toString()
   const res = await fetch(`${BASE}/violations${query ? `?${query}` : ''}`)
