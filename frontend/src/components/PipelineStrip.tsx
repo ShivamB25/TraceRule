@@ -2,9 +2,9 @@ import { memo } from 'react'
 import { FileText, UserCheck, Radar } from 'lucide-react'
 
 const steps = [
-  { num: 1, title: 'Policy PDF Ingest', desc: 'AI compilation', icon: FileText, color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
-  { num: 2, title: 'Human Approval Gate', desc: 'Auditable SQL', icon: UserCheck, color: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' },
-  { num: 3, title: 'Deterministic Enforcement', desc: 'Zero LLM scan', icon: Radar, color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
+  { num: 1, title: 'Policy PDF Ingest', desc: 'AST + SQL auto-heal', icon: FileText, color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10' },
+  { num: 2, title: 'Human Approval Gate', desc: 'Auditable logic + SQL', icon: UserCheck, color: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' },
+  { num: 3, title: 'V3 Enforcement', desc: 'SQL + courtroom', icon: Radar, color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' },
 ] as const
 
 function PipelineStrip() {

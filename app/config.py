@@ -6,8 +6,10 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://postgres:postgres@localhost:5432/tracerule"
     )
     anthropic_api_key: str = ""
+    logfire_token: str = ""
     scan_interval_minutes: int = 5
     explanation_model_limit_per_scan: int = 25
+    semantic_candidate_limit_per_rule: int = 200
 
     model_config = {"env_file": ".env"}
 

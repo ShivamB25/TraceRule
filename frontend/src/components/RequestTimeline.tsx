@@ -32,7 +32,7 @@ export default function RequestTimeline({ events }: RequestTimelineProps) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Compliance Lifecycle Timeline</h2>
-          <p className="text-xs text-slate-400">Live trace of policy ingestion, approval actions, scan execution, and violation enrichment.</p>
+          <p className="text-xs text-slate-400">Live trace of V3 ingestion, approval actions, scan execution, and courtroom verdicting.</p>
         </div>
         <button
           type="button"

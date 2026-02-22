@@ -45,7 +45,7 @@ export default function UploadPanel({ uploading, lastUpload, extractedCount, onU
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-white">Policy Document</h2>
-          <p className="text-xs text-slate-500">Upload an AML, privacy, or internal policy file (.pdf or .md). The agent compiles clauses into SQL checks.</p>
+          <p className="text-xs text-slate-500">Upload an AML, privacy, or internal policy file (.pdf or .md). V3 compiles deontic logic trees, validates SQL via EXPLAIN, and prepares courtroom-ready rules.</p>
         </div>
         <div className="hidden items-center gap-1 rounded-full border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] text-slate-400 sm:inline-flex">
           <Sparkles className="h-3.5 w-3.5 text-blue-400" />

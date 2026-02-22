@@ -7,7 +7,12 @@ describe('RuleCard', () => {
   const baseRule = {
     id: 1, title: 'No NULLs in user_id', severity: 'HIGH' as const,
     status: 'pending_review' as const, compiled_sql: 'SELECT id FROM users WHERE user_id IS NULL',
-    is_deterministic: true, policy_id: 2, source_quote: 'Quote', ai_explanation: null,
+    policy_id: 2,
+    rule_id: 'RULE-1',
+    source_quote: 'Quote',
+    target_table: 'users',
+    logic_tree_json: { logic_type: 'AND', children: [] },
+    requires_semantic_scan: false,
   }
 
   it('calls onApprove with rule id when Approve is clicked', async () => {

@@ -1,37 +1,47 @@
-# TraceRule — Task completion checklist
+# TraceRule — Task Completion Checklist
 
 After any coding task, verify:
 
-## 1. Type safety
-- No `Any` types
-- All functions have return type annotations
-- ORM columns use `Mapped[T]` + `mapped_column()`
-
-## 2. Tests
+## 1. Tests (76 total)
 ```bash
-uv run pytest
+uv run pytest -v
 ```
-Tests use in-memory SQLite (aiosqlite). JSONVariant TypeDecorator handles JSON compat across Postgres and SQLite.
+26 V1 + 50 V3 tests. In-memory SQLite via aiosqlite. No API key needed.
 
-## 3. Linting (no config file, run ad-hoc)
+## 2. Lint + Format
 ```bash
-uv run ruff check app/ tests/
+uv run ruff check app/ tests/ --ignore E402
 uv run ruff format --check app/ tests/
 ```
 
-## 4. Pattern compliance
-- PydanticAI agents use `@lru_cache` factory, `output_type=`, `result.output`
-- Background tasks use `async_session_factory()`, not `Depends(get_db)`
-- New routes registered in `app/main.py` with `/api/v1/` prefix
-- ORM response schemas have `model_config = {"from_attributes": True}`
-- No forbidden libraries (LangChain, Celery, Redis, Alembic, etc.)
-- Flat folder structure, no nested DDD directories
+## 3. Type Safety
+- No `Any` type hints (except schema field `value: Any | None`)
+- All functions have return type annotations
+- ORM columns use `Mapped[T]` + `mapped_column()`
+- Bool check before numeric in ast_compiler.py (bool subclasses int)
 
-## 5. Import order
-stdlib → third-party → app-local. Inline imports OK to break circular deps (see routes/policies.py).
+## 4. Pattern Compliance
 
-## 6. Smoke test (if applicable)
-```bash
-uv run uvicorn app.main:app --reload
-# Check http://localhost:8000/docs loads
-```
+### PydanticAI
+- `output_type=` not `result_type=`
+- `result.output` not `result.data`
+- `@output_validator` not `@result_validator`
+- `@lru_cache(maxsize=1)` factory for agents
+
+### FastAPI
+- V1 routes: `/api/v1/` prefix (app/routes/)
+- V3 routes: `/api/v3/` prefix (app/api/)
+- Background tasks: `async_session_factory()` not `Depends(get_db)`
+- ORM responses: `model_config = {"from_attributes": True}`
+- Lifespan context manager, not `@app.on_event`
+
+### Models
+- TypeDecorators for Postgres/SQLite compat (JSONVariant, TSVectorVariant)
+- No pgvector, no VectorVariant, no embedding columns
+- No `CREATE EXTENSION vector` in lifespan
+
+### Forbidden
+LangChain, LangGraph, Instructor, Celery, Redis, Docling, Alembic, pgvector, numpy
+
+## 5. Import Order
+stdlib → third-party → app-local. Inline imports OK for circular deps.

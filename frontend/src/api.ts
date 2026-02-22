@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  paginatedViolationsSchema,
   policyUploadResponseSchema,
   ruleSchema,
   rulesSchema,
@@ -7,15 +8,15 @@ import {
   violationsSchema,
 } from './types'
 import type {
+  PaginatedViolations,
   PolicyUploadResponse,
   Rule,
   RuleStatus,
   ScanResult,
-  Violation,
   ViolationStatus,
 } from './types'
 
-const BASE = '/api/v1'
+const BASE = '/api/v3'
 
 async function parseJsonResponse<T>(res: Response, parser: (data: unknown) => T): Promise<T> {
   let data: unknown
@@ -29,11 +30,32 @@ async function parseJsonResponse<T>(res: Response, parser: (data: unknown) => T)
     return parser(data)
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const issues = err.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
+      const issues = err.issues
+        .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : '(root)'}: ${issue.message}`)
+        .join('; ')
       throw new Error(`Response validation failed: ${issues}`)
     }
     throw err
   }
+}
+
+function parseViolationsResponse(data: unknown, limit: number, offset: number): PaginatedViolations {
+  const paginated = paginatedViolationsSchema.safeParse(data)
+  if (paginated.success) {
+    return paginated.data
+  }
+
+  const legacyList = violationsSchema.safeParse(data)
+  if (legacyList.success) {
+    return {
+      items: legacyList.data,
+      total_count: legacyList.data.length,
+      limit,
+      offset,
+    }
+  }
+
+  throw paginated.error
 }
 
 /**
@@ -91,21 +113,30 @@ export async function rejectRule(id: number): Promise<Rule> {
  * Fetches violations with optional rule and status filters.
  * @param ruleId Optional rule id filter.
  * @param status Optional violation status filter.
- * @returns Parsed list of violations.
+ * @param limit Page size.
+ * @param offset Offset for pagination.
+ * @returns Parsed paginated violations.
  */
-export async function getViolations(ruleId?: number, status?: ViolationStatus): Promise<Violation[]> {
+export async function getViolations(
+  ruleId?: number,
+  status?: ViolationStatus,
+  limit = 50,
+  offset = 0,
+): Promise<PaginatedViolations> {
   const params = new URLSearchParams()
-  if (ruleId !== undefined) params.set('rule_id', String(ruleId))
+  if (ruleId !== undefined) params.set('v3_rule_id', String(ruleId))
   if (status) params.set('status', status)
+  params.set('limit', String(limit))
+  params.set('offset', String(offset))
   const query = params.toString()
   const res = await fetch(`${BASE}/violations${query ? `?${query}` : ''}`)
   if (!res.ok) throw new Error(`Failed to fetch violations: ${res.status}`)
-  return parseJsonResponse(res, (data) => violationsSchema.parse(data))
+  return parseJsonResponse(res, (data) => parseViolationsResponse(data, limit, offset))
 }
 
 /**
- * Triggers a deterministic scan run.
- * @returns Parsed scan result with count of new violations.
+ * Triggers a V3 scan run.
+ * @returns Parsed scan result split by deterministic vs semantic violations.
  */
 export async function triggerScan(): Promise<ScanResult> {
   const res = await fetch(`${BASE}/scan`, { method: 'POST' })

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-INTERNAL_TABLES = ("policies", "rules", "violations")
+INTERNAL_TABLES = ("policies", "rules", "violations", "v3_rules", "v3_violations")
 
 
 def _get_engine():

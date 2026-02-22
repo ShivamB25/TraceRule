@@ -57,13 +57,23 @@ export default function RuleCard({ rule, onApprove, onReject }: RuleCardProps) {
       <div className="mb-4">
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            rule.is_deterministic
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+            rule.requires_semantic_scan
+              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
           }`}
         >
-          {rule.is_deterministic ? 'Deterministic' : 'Requires Human Judgment'}
+          {rule.requires_semantic_scan ? 'Semantic + Courtroom' : 'Deterministic SQL'}
         </span>
+        <span className="ml-2 rounded-full border border-slate-600 bg-slate-900/70 px-2.5 py-0.5 text-xs text-slate-300">
+          Target: {rule.target_table}
+        </span>
+      </div>
+
+      <div className="mb-4">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-slate-500">Logic Tree</p>
+        <section className="overflow-x-auto rounded-lg bg-slate-950 p-3" aria-label="Rule logic tree in JSON format">
+          <pre className="font-mono text-xs text-slate-300">{JSON.stringify(rule.logic_tree_json, null, 2)}</pre>
+        </section>
       </div>
 
       {rule.status === 'pending_review' ? (

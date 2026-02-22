@@ -41,25 +41,38 @@ export interface PolicyUploadResponse {
 export interface Rule {
   id: number
   policy_id: number
+  rule_id: string
   title: string
   source_quote: string
   severity: RuleSeverity
+  target_table: string
+  logic_tree_json: Record<string, unknown> | null
+  requires_semantic_scan: boolean
   compiled_sql: string | null
-  is_deterministic: boolean
   status: RuleStatus
 }
 
 export interface Violation {
   id: number
-  rule_id: number
-  record_pk: string
-  violating_data: Record<string, unknown>
-  ai_explanation: string | null
+  v3_rule_id: number
+  record_id: number
+  violation_data: Record<string, unknown>
+  verdict_reasoning: string | null
+  confidence_score: number | null
   status: ViolationStatus
 }
 
+export interface PaginatedViolations {
+  items: Violation[]
+  total_count: number
+  limit: number
+  offset: number
+}
+
 export interface ScanResult {
-  violations_found: number
+  deterministic_violations: number
+  semantic_violations: number
+  total: number
 }
 
 export const policyUploadResponseSchema = z.object({
@@ -71,6 +84,7 @@ export const policyUploadResponseSchema = z.object({
 export const ruleSchema = z.object({
   id: z.number(),
   policy_id: z.number(),
+  rule_id: z.string().min(1),
   title: z.string().min(1),
   source_quote: z.string(),
   severity: z.enum([
@@ -79,23 +93,35 @@ export const ruleSchema = z.object({
     RULE_SEVERITY.MEDIUM,
     RULE_SEVERITY.LOW,
   ]),
+  target_table: z.string().min(1),
+  logic_tree_json: z.record(z.string(), z.unknown()).nullable(),
+  requires_semantic_scan: z.boolean(),
   compiled_sql: z.string().nullable(),
-  is_deterministic: z.boolean(),
   status: z.enum([RULE_STATUS.PENDING_REVIEW, RULE_STATUS.APPROVED, RULE_STATUS.REJECTED]),
 })
 
 export const violationSchema = z.object({
   id: z.number(),
-  rule_id: z.number(),
-  record_pk: z.string(),
-  violating_data: z.record(z.string(), z.unknown()),
-  ai_explanation: z.string().nullable(),
+  v3_rule_id: z.number(),
+  record_id: z.number(),
+  violation_data: z.record(z.string(), z.unknown()),
+  verdict_reasoning: z.string().nullable(),
+  confidence_score: z.number().nullable(),
   status: z.enum([VIOLATION_STATUS.OPEN, VIOLATION_STATUS.RESOLVED]),
 })
 
 export const scanResultSchema = z.object({
-  violations_found: z.number(),
+  deterministic_violations: z.number(),
+  semantic_violations: z.number(),
+  total: z.number(),
 })
 
 export const rulesSchema = z.array(ruleSchema)
 export const violationsSchema = z.array(violationSchema)
+
+export const paginatedViolationsSchema = z.object({
+  items: violationsSchema,
+  total_count: z.number().int().nonnegative(),
+  limit: z.number().int().positive(),
+  offset: z.number().int().nonnegative(),
+})

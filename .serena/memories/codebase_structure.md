@@ -1,62 +1,82 @@
-# TraceRule — Codebase structure (supplements AGENTS.md)
+# TraceRule — Codebase Structure
 
-Only info NOT already in AGENTS.md lives here.
+## Directory Layout
 
-## SQLite/Postgres compatibility
+```
+app/
+├── main.py              # FastAPI app + lifespan (DB init + scheduler), CORS, health, router registration
+├── config.py            # pydantic-settings BaseSettings (.env)
+├── database.py          # async engine, session factory, get_db()
+├── models.py            # ORM: Policy, Rule, Violation, CompanyRecord, V3Rule, V3Violation + TypeDecorators
+├── schemas.py           # Pydantic: V1 CompiledRule + V3 GlobalOntology, Condition, LogicNode, SymbolicRule, responses
+├── ast_compiler.py      # Pure-Python recursive AST→SQL compiler (no LLM)
+├── agents/
+│   ├── compiler.py      # V1: policy text → list[CompiledRule] via Claude
+│   ├── explainer.py     # V1: violation → 2-sentence explanation via Claude
+│   ├── extractor.py     # V3: policy text → list[SymbolicRule] (deontic AST) with @output_validator reflexion
+│   └── courtroom.py     # V3: Prosecutor + Defender + Chief Justice adversarial debate
+├── services/
+│   ├── ingestion.py     # V1 ingest_policy() + V3 ingest_policy_v3() with global ontology + chunking
+│   └── scanner.py       # V1 run_deterministic_scan() + V3 run_v3_scan() with SQL pre-filter + courtroom
+├── routes/              # V1 endpoints (/api/v1/)
+│   ├── policies.py      # POST /policies/upload
+│   ├── rules.py         # GET/PATCH rules
+│   └── violations.py    # GET violations, POST /scan
+└── api/                 # V3 endpoints (/api/v3/)
+    ├── __init__.py
+    └── router.py        # POST upload, GET/PATCH rules, GET violations, POST scan
 
-`JSONVariant` (models.py) is a custom `TypeDecorator` that maps to JSONB on Postgres and plain JSON on SQLite. This is how tests run against in-memory SQLite while production uses Postgres JSONB columns.
+tests/
+├── conftest.py          # In-memory SQLite setup, fixture overrides
+├── test_ast_compiler.py # 23 tests: all operators, logic types, edge cases
+├── test_policies.py     # 5 tests: V1 upload, missing file, health
+├── test_rules.py        # 10 tests: V1 rule CRUD, filters, approve/reject
+├── test_scanner.py      # 4 tests: V1 scanner, bad SQL, explanation limit
+├── test_violations.py   # 7 tests: V1 violation CRUD, filters
+├── test_v3_policies.py  # 4 tests: V3 upload PDF/MD, 422, 400
+├── test_v3_rules.py     # 11 tests: V3 rule CRUD, filters, approve/reject
+├── test_v3_scanner.py   # 7 tests: V3 scanner, bad SQL, dedup, endpoint
+└── test_v3_violations.py # 6 tests: V3 violation CRUD, filters (total: 76+1 = 77... actually 76)
+```
 
-## Route handlers by file
+## V1 API Endpoints (prefix: /api/v1/)
 
-| Method | Path | Handler | File |
-|--------|------|---------|------|
-| POST | /policies/upload | `upload_policy` | routes/policies.py |
-| GET | /rules | `list_rules` | routes/rules.py |
-| GET | /rules/{rule_id} | `get_rule` | routes/rules.py |
-| PATCH | /rules/{rule_id}/status | `update_rule_status` | routes/rules.py |
-| PATCH | /rules/{rule_id}/approve | `approve_rule` | routes/rules.py |
-| PATCH | /rules/{rule_id}/reject | `reject_rule` | routes/rules.py |
-| GET | /violations | `list_violations` | routes/violations.py |
-| GET | /violations/{violation_id} | `get_violation` | routes/violations.py |
-| POST | /scan | `trigger_scan` | routes/violations.py |
+| Method | Path | Handler |
+|--------|------|---------|
+| POST | /policies/upload | upload_policy |
+| GET | /rules | list_rules |
+| GET | /rules/{id} | get_rule |
+| PATCH | /rules/{id}/approve | approve_rule |
+| PATCH | /rules/{id}/reject | reject_rule |
+| PATCH | /rules/{id}/status | update_rule_status |
+| GET | /violations | list_violations |
+| GET | /violations/{id} | get_violation |
+| POST | /scan | trigger_scan |
 
-## Test setup (tests/conftest.py)
+## V3 API Endpoints (prefix: /api/v3/)
+
+| Method | Path | Handler |
+|--------|------|---------|
+| POST | /policies/upload | upload_policy_v3 |
+| GET | /rules | list_v3_rules |
+| GET | /rules/{id} | get_v3_rule |
+| PATCH | /rules/{id}/approve | approve_v3_rule |
+| PATCH | /rules/{id}/reject | reject_v3_rule |
+| GET | /violations | list_v3_violations |
+| GET | /violations/{id} | get_v3_violation |
+| POST | /scan | trigger_v3_scan |
+
+## SQLite/Postgres Compatibility (TypeDecorators)
+
+- `JSONVariant` — JSONB on Postgres, JSON on SQLite
+- `TSVectorVariant` — TSVECTOR on Postgres, Text on SQLite
+
+GIN index `ix_records_search_vector` uses `postgresql_using="gin"` — SQLAlchemy silently ignores on SQLite.
+
+## Test Setup (conftest.py)
 
 - In-memory SQLite via `aiosqlite` + `StaticPool`
 - `app.dependency_overrides[get_db]` swaps the DB session
-- `autouse=True` fixture runs `create_all` / `drop_all` per test
+- `autouse=True` fixture runs `create_all`/`drop_all` per test
 - `httpx.AsyncClient` with `ASGITransport` for API testing
-- Config in `pyproject.toml` only (pytest.ini removed)
-- 23 tests across 4 files: `test_rules.py` (10), `test_violations.py` (8), `test_scanner.py` (3), `test_policies.py` (3)
-
-## Docker (multi-stage)
-
-- Build stage: `ghcr.io/astral-sh/uv:python3.13-bookworm-slim` with cache mounts
-- Runtime stage: `python:3.13-slim-bookworm`, non-root user, no uv in final image
-- CMD runs `uvicorn` directly (not via `uv run`)
-
-
-## Recent additions (2026-02-22)
-
-### Scripts directory
-- `scripts/reset_db.py` — repeatable DB reset utility
-  - default: truncates `policies`, `rules`, `violations`
-  - `--all-public`: truncates all public schema tables
-- `scripts/extract_aml_demo.py` — capped extraction from IBM AML zip without full unzip
-  - profiles: `tiny`, `small`
-  - budget control: `--budget-gb`
-  - writes `data/aml_demo/manifest.json`
-- `scripts/load_aml_demo_to_db.py` — loader for extracted AML CSVs into Postgres
-  - creates `transactions` and `accounts` tables if missing
-  - batched inserts + unique `(source_file, source_row_number)`
-  - supports `--max-trans-rows`, `--max-account-rows`, `--no-truncate`
-
-### Frontend flow improvements
-- `frontend/src/components/RequestTimeline.tsx` — separate live timeline panel for request lifecycle
-  - includes optional Technical Mode to show request/response endpoint lines
-- `frontend/src/components/ViolationsPanel.tsx` + `frontend/src/api.ts`
-  - violations filtering now uses backend query params (`rule_id`, `status`)
-- `frontend/src/App.tsx`
-  - unified refresh path, manual refresh, last-updated indicator
-  - upload polling timeout guard
-  - timeline events for upload/compile/review/scan/explanation lifecycle
+- Config in `pyproject.toml` only: `asyncio_mode = "auto"`, `pythonpath = "."`
