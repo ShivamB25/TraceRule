@@ -1,6 +1,6 @@
 # How TraceRule's agents process policy documents
 
-Six Claude agents, two pipelines, one goal: turn legal text into enforceable database queries. No agent talks to another directly. The service layer passes typed Pydantic schemas between them.
+Seven Claude agents, two pipelines, one goal: turn legal text into enforceable database queries. No agent talks to another directly. The service layer passes typed Pydantic schemas between them.
 
 ---
 
@@ -8,36 +8,37 @@ Six Claude agents, two pipelines, one goal: turn legal text into enforceable dat
 
 ```mermaid
 flowchart TD
-    PDF["📄 Policy PDF upload"]
+    PDF["Policy PDF upload"]
 
-    subgraph TEXT_EXTRACT["Text extraction (CPU, ~200ms)"]
+    subgraph TEXT_EXTRACT["Text extraction - CPU, ~200ms"]
         PYMUPDF["pymupdf4llm.to_markdown()"]
     end
 
     subgraph SCHEMA["Database introspection"]
-        INTRO["information_schema.columns → schema context string"]
+        INTRO["information_schema.columns\nschema context string"]
     end
 
     PDF --> PYMUPDF
     PYMUPDF --> MARKDOWN["Markdown text"]
-    MARKDOWN --> V1_PATH
-    MARKDOWN --> V3_PATH
+    MARKDOWN --> COMPILER
+    MARKDOWN --> LEXICON
+    MARKDOWN --> CHUNKER
 
     subgraph V1_PATH["V1 Pipeline"]
         direction TB
-        COMPILER["🤖 Compiler Agent\nClaude Sonnet 4.6\nadaptive thinking · high effort\n3 retries"]
+        COMPILER["Compiler Agent\nClaude Sonnet 4.6\nadaptive thinking, high effort\n3 retries"]
         RULES_V1["Rule rows\nstatus=pending_review\ncompiled_sql + source_quote"]
         COMPILER --> RULES_V1
     end
 
     subgraph V3_PATH["V3 Pipeline"]
         direction TB
-        LEXICON["🤖 Lexicon Agent\nClaude Sonnet 4.6\nthinking budget: 4K tokens\nreads first 12K chars"]
-        ONTOLOGY["GlobalOntology\n{term → definition}"]
-        CHUNKER["Chunker\n4000 chars · 500 overlap"]
-        EXTRACTOR["🤖 Extractor Agent\nClaude Sonnet 4.6\nthinking budget: 10K tokens\n4 retries + @output_validator"]
-        AST_COMP["AST Compiler\npure Python · no LLM\nLogicNode → SQL WHERE"]
-        EXPLAIN["EXPLAIN sandbox\nbegin_nested() → rollback"]
+        LEXICON["Lexicon Agent\nClaude Sonnet 4.6\nthinking budget: 4K tokens\nreads first 12K chars"]
+        ONTOLOGY["GlobalOntology\nterm to definition map"]
+        CHUNKER["Chunker\n4000 chars, 500 overlap"]
+        EXTRACTOR["Extractor Agent\nClaude Sonnet 4.6\nthinking budget: 10K tokens\n4 retries + output_validator"]
+        AST_COMP["AST Compiler\npure Python, no LLM\nLogicNode to SQL WHERE"]
+        EXPLAIN["EXPLAIN sandbox\nbegin_nested then rollback"]
         RETRY{"Postgres\nerror?"}
         MODEL_RETRY["ModelRetry\nfull stack trace\nback to Claude"]
         RULES_V3["V3Rule rows\nstatus=pending_review\nlogic_tree_json + compiled_sql"]
@@ -50,23 +51,22 @@ flowchart TD
         EXPLAIN --> RETRY
         RETRY -- "Yes" --> MODEL_RETRY
         MODEL_RETRY --> EXTRACTOR
-        RETRY -- "No (SQL valid)" --> RULES_V3
+        RETRY -- "No, SQL valid" --> RULES_V3
     end
 
-    INTRO --> V1_PATH
-    INTRO --> V3_PATH
-    MARKDOWN --> CHUNKER
+    INTRO --> COMPILER
+    INTRO --> EXTRACTOR
 
-    RULES_V1 --> HITL["👤 Human review\nApprove / Reject"]
+    RULES_V1 --> HITL["Human review\nApprove or Reject"]
     RULES_V3 --> HITL
 
-    HITL --> SCAN_V1["V1 Scanner\ndb.execute(compiled_sql)\n~2ms/rule · zero LLM"]
+    HITL --> SCAN_V1["V1 Scanner\ndb.execute compiled_sql\n~2ms per rule, zero LLM"]
     HITL --> SCAN_V3["V3 Scanner\n3-path routing"]
 
     SCAN_V1 --> VIOLATIONS["Violations"]
     SCAN_V3 --> VIOLATIONS
 
-    SCAN_V1 --> EXPLAINER["🤖 Explainer Agent\nadaptive · medium effort\ncapped at 25/scan"]
+    SCAN_V1 --> EXPLAINER["Explainer Agent\nadaptive, medium effort\ncapped at 25 per scan"]
     EXPLAINER --> VIOLATIONS
 
     style V1_PATH fill:#1e293b,stroke:#3b82f6,color:#e2e8f0
@@ -144,26 +144,26 @@ flowchart TD
 
     LOOP --> CHECK{"requires_semantic_scan?"}
 
-    CHECK -- "False" --> PATH_A
+    CHECK -- "False" --> EXEC_A
     CHECK -- "True" --> HAS_SQL{"compiled_sql\nexists?"}
 
-    HAS_SQL -- "Yes (mixed rule)" --> PATH_B
-    HAS_SQL -- "No (pure vague)" --> PATH_C
+    HAS_SQL -- "Yes, mixed rule" --> EXEC_B
+    HAS_SQL -- "No, pure vague" --> BM25_C
 
     subgraph PATH_A["Path A: Pure deterministic"]
         direction TB
-        EXEC_A["db.execute(compiled_sql)"]
-        SAVE_A["Save V3Violation\nconfidence = 1.0\nreasoning = 'Deterministic SQL match'"]
+        EXEC_A["db.execute compiled_sql"]
+        SAVE_A["Save V3Violation\nconfidence = 1.0\nDeterministic SQL match"]
         EXEC_A --> SAVE_A
     end
 
     subgraph PATH_B["Path B: SQL pre-filter + courtroom"]
         direction TB
-        EXEC_B["db.execute(compiled_sql)\nIS_VAGUE → 1=1 gives superset"]
+        EXEC_B["db.execute compiled_sql\nIS_VAGUE compiles to 1=1, gives superset"]
         FAIL_B{"SQL\nfailed?"}
         BM25_B["Fallback: BM25 text search\nts_rank + websearch_to_tsquery"]
         CANDIDATES_B["Candidate rows"]
-        COURT_B["Adversarial Courtroom\n(per candidate)"]
+        COURT_B["Adversarial Courtroom\nper candidate"]
 
         EXEC_B --> FAIL_B
         FAIL_B -- "Yes" --> BM25_B
@@ -176,7 +176,7 @@ flowchart TD
         direction TB
         BM25_C["BM25 text search\non company_records table\nts_rank + websearch_to_tsquery"]
         CANDIDATES_C["Candidate rows"]
-        COURT_C["Adversarial Courtroom\n(per candidate)"]
+        COURT_C["Adversarial Courtroom\nper candidate"]
 
         BM25_C --> CANDIDATES_C
         CANDIDATES_C --> COURT_C
@@ -204,9 +204,9 @@ Prosecutor and Defender run concurrently via `asyncio.gather`. The Chief Justice
 ```mermaid
 sequenceDiagram
     participant S as Scanner
-    participant P as 🔴 Prosecutor
-    participant D as 🔵 Defender
-    participant J as ⚖️ Chief Justice
+    participant P as Prosecutor
+    participant D as Defender
+    participant J as Chief Justice
 
     S->>S: Build context string:\nRULE RUBRIC + RECORD EVIDENCE
 
@@ -245,20 +245,20 @@ No agent calls another. The service layer moves typed Pydantic models between th
 flowchart LR
     subgraph INGESTION["Ingestion phase"]
         direction TB
-        LEX["Lexicon Agent"] -->|"GlobalOntology\n{definitions: dict}"| EXT["Extractor Agent"]
-        EXT -->|"list[SymbolicRuleDraft]\n{logic_tree: str, target_table, ...}"| AST["AST Compiler"]
-        AST -->|"str (SQL WHERE clause)"| VAL["@output_validator"]
-        VAL -->|"ModelRetry(postgres_error)"| EXT
+        LEX["Lexicon Agent"] -->|"GlobalOntology\ndefinitions: dict"| EXT["Extractor Agent"]
+        EXT -->|"list of SymbolicRuleDraft\nlogic_tree, target_table"| AST["AST Compiler"]
+        AST -->|"SQL WHERE clause string"| VAL["output_validator"]
+        VAL -->|"ModelRetry with postgres_error"| EXT
         VAL -->|"SymbolicRuleDraft\nwith compiled_sql filled"| DB1[("V3Rule\nin database")]
     end
 
     subgraph SCAN["Scan phase"]
         direction TB
-        SCANNER["Scanner"] -->|"dict (record_data)\n+ str (rubric)"| PROS["Prosecutor"]
-        SCANNER -->|"dict (record_data)\n+ str (rubric)"| DEF["Defender"]
-        PROS -->|"LegalArgument\n{points, citations}"| CJ["Chief Justice"]
-        DEF -->|"LegalArgument\n{points, citations}"| CJ
-        CJ -->|"Verdict\n{is_violation, confidence, reasoning}"| DB2[("V3Violation\nin database")]
+        SCANNER["Scanner"] -->|"dict record_data\n+ str rubric"| PROS["Prosecutor"]
+        SCANNER -->|"dict record_data\n+ str rubric"| DEF["Defender"]
+        PROS -->|"LegalArgument\npoints, citations"| CJ["Chief Justice"]
+        DEF -->|"LegalArgument\npoints, citations"| CJ
+        CJ -->|"Verdict\nis_violation, confidence, reasoning"| DB2[("V3Violation\nin database")]
     end
 
     DB1 -.->|"approved rules"| SCANNER
@@ -301,26 +301,26 @@ flowchart TD
 
 ## 7. Agent registry
 
-All six agents (seven counting the Lexicon, which is inline), their configurations, and when they fire.
+All seven agents, their configurations, and when they fire.
 
 ```mermaid
 graph TD
     subgraph AGENTS["Agent registry — all Claude Sonnet 4.6"]
         direction TB
 
-        A1["🤖 Lexicon Agent\n─────────────\nThinking: enabled, 4K budget\nMax tokens: 8K\nRetries: default\nRuns: once per V3 ingestion\nFile: ingestion.py (inline)\nOutput: GlobalOntology"]
+        A1["Lexicon Agent\n─────────────\nThinking: enabled, 4K budget\nMax tokens: 8K\nRetries: default\nRuns: once per V3 ingestion\nFile: ingestion.py inline\nOutput: GlobalOntology"]
 
-        A2["🤖 Compiler Agent\n─────────────\nThinking: adaptive, high effort\nRetries: 3\nRuns: once per V1 ingestion\nFile: agents/compiler.py\nOutput: list[CompiledRule]\nFactory: @lru_cache"]
+        A2["Compiler Agent\n─────────────\nThinking: adaptive, high effort\nRetries: 3\nRuns: once per V1 ingestion\nFile: agents/compiler.py\nOutput: list of CompiledRule\nFactory: lru_cache"]
 
-        A3["🤖 Extractor Agent\n─────────────\nThinking: enabled, 10K budget\nMax tokens: 20K\nRetries: 4\nRuns: per chunk during V3 ingestion\nFile: agents/extractor.py\nOutput: list[SymbolicRuleDraft]\nFactory: @lru_cache\nSpecial: @output_validator reflexion"]
+        A3["Extractor Agent\n─────────────\nThinking: enabled, 10K budget\nMax tokens: 20K\nRetries: 4\nRuns: per chunk during V3 ingestion\nFile: agents/extractor.py\nOutput: list of SymbolicRuleDraft\nFactory: lru_cache\nSpecial: output_validator reflexion"]
 
-        A4["🤖 Explainer Agent\n─────────────\nThinking: adaptive, medium effort\nRetries: default\nRuns: post-V1-scan, capped at 25\nFile: agents/explainer.py\nOutput: str (2-sentence explanation)\nFactory: @lru_cache"]
+        A4["Explainer Agent\n─────────────\nThinking: adaptive, medium effort\nRetries: default\nRuns: post-V1-scan, capped at 25\nFile: agents/explainer.py\nOutput: str, 2-sentence explanation\nFactory: lru_cache"]
 
-        A5["🔴 Prosecutor Agent\n─────────────\nThinking: enabled, 8K budget\nMax tokens: 16K\nRuns: per candidate in V3 semantic scan\nFile: agents/courtroom.py\nOutput: LegalArgument\nFactory: @lru_cache"]
+        A5["Prosecutor Agent\n─────────────\nThinking: enabled, 8K budget\nMax tokens: 16K\nRuns: per candidate in V3 semantic scan\nFile: agents/courtroom.py\nOutput: LegalArgument\nFactory: lru_cache"]
 
-        A6["🔵 Defender Agent\n─────────────\nThinking: enabled, 8K budget\nMax tokens: 16K\nRuns: per candidate (parallel w/ Prosecutor)\nFile: agents/courtroom.py\nOutput: LegalArgument\nFactory: @lru_cache"]
+        A6["Defender Agent\n─────────────\nThinking: enabled, 8K budget\nMax tokens: 16K\nRuns: per candidate, parallel w/ Prosecutor\nFile: agents/courtroom.py\nOutput: LegalArgument\nFactory: lru_cache"]
 
-        A7["⚖️ Chief Justice Agent\n─────────────\nThinking: enabled, 16K budget\nMax tokens: 32K\nRuns: per candidate (after both arguments)\nFile: agents/courtroom.py\nOutput: Verdict\nFactory: @lru_cache"]
+        A7["Chief Justice Agent\n─────────────\nThinking: enabled, 16K budget\nMax tokens: 32K\nRuns: per candidate, after both arguments\nFile: agents/courtroom.py\nOutput: Verdict\nFactory: lru_cache"]
     end
 
     style AGENTS fill:#0f172a,stroke:#475569,color:#e2e8f0
@@ -351,13 +351,13 @@ Every violation traces back to the original PDF, through every intermediate repr
 
 ```mermaid
 flowchart BT
-    PDF["📄 Policy PDF\n(policies.markdown_text)"]
+    PDF["Policy PDF\n policies.markdown_text"]
     QUOTE["Source quote\n(v3_rules.source_quote)"]
     AST["Logic tree\n(v3_rules.logic_tree_json)"]
     SQL["Compiled SQL\n(v3_rules.compiled_sql)"]
     VERDICT["Courtroom verdict\n(v3_violations.verdict_reasoning)"]
     CONFIDENCE["Confidence score\n(v3_violations.confidence_score)"]
-    VIOLATION["🚨 Violation record\n(v3_violations.violation_data)"]
+    VIOLATION["Violation record\n v3_violations.violation_data"]
 
     VIOLATION --> CONFIDENCE
     CONFIDENCE --> VERDICT

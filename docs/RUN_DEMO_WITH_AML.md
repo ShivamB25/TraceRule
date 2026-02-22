@@ -121,7 +121,7 @@ async def main():
         checks = {
             'v3_rules_total': 'SELECT COUNT(*) FROM v3_rules',
             'v3_rules_approved': "SELECT COUNT(*) FROM v3_rules WHERE status = 'approved'",
-            'v3_rules_with_vague': 'SELECT COUNT(*) FROM v3_rules WHERE has_vague_conditions = TRUE',
+            'v3_rules_with_vague': 'SELECT COUNT(*) FROM v3_rules WHERE requires_semantic_scan = TRUE',
             'v3_violations_total': 'SELECT COUNT(*) FROM v3_violations',
             'v3_high_confidence': 'SELECT COUNT(*) FROM v3_violations WHERE confidence_score >= 0.8',
             'company_records': 'SELECT COUNT(*) FROM company_records',

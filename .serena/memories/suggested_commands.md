@@ -15,7 +15,7 @@ uv add <package>         # add production dep
 uv add --dev <package>   # add dev dep
 ```
 
-## Tests (76 total: 26 V1 + 50 V3)
+## Tests (78 total)
 ```bash
 uv run pytest            # all tests
 uv run pytest -v         # verbose

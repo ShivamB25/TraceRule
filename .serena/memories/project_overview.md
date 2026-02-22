@@ -34,7 +34,7 @@ Python >=3.13, FastAPI, PydanticAI (claude-sonnet-4-6), SQLAlchemy 2.x async (as
 
 ## Test State
 
-76 tests across 10 files, all passing. In-memory SQLite via aiosqlite. No API key needed for tests.
+78 tests across 10 files, all passing. In-memory SQLite via aiosqlite. No API key needed for tests.
 
 ## Forbidden
 

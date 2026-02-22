@@ -45,7 +45,7 @@ No pgvector. No embeddings. No RRF. No numpy.
 
 ## Verification State
 
-- **76/76 tests passing** (26 V1 + 50 V3) in ~0.7s
+- **78/78 tests passing** in ~0.7s
 - `ruff check` — all passed
 - `ruff format` — all formatted
 - `uv sync` — pgvector and numpy uninstalled from venv
@@ -54,7 +54,7 @@ No pgvector. No embeddings. No RRF. No numpy.
 
 - V3Violation.record_id is plain `Mapped[int]` (no ForeignKey to company_records — allows deterministic scan to reference any table's id)
 - AST compiler: bool check before numeric check (Python bool subclasses int)
-- Extractor agent: retries=4, thinking budget=16000
+- Extractor agent: retries=4, thinking budget=10000, max_tokens=20000
 - Courtroom: Prosecutor+Defender thinking=8000, Chief Justice thinking=16000
 - All agents use claude-sonnet-4-6
 - BM25 uses Postgres-native ts_rank + websearch_to_tsquery (no extensions needed)
