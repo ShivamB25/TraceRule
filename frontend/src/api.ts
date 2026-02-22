@@ -5,6 +5,7 @@ import {
   ruleSchema,
   rulesSchema,
   scanResultSchema,
+  violationsSchema,
 } from './types'
 import type {
   PaginatedViolations,
@@ -29,11 +30,32 @@ async function parseJsonResponse<T>(res: Response, parser: (data: unknown) => T)
     return parser(data)
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const issues = err.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
+      const issues = err.issues
+        .map((issue) => `${issue.path.length > 0 ? issue.path.join('.') : '(root)'}: ${issue.message}`)
+        .join('; ')
       throw new Error(`Response validation failed: ${issues}`)
     }
     throw err
   }
+}
+
+function parseViolationsResponse(data: unknown, limit: number, offset: number): PaginatedViolations {
+  const paginated = paginatedViolationsSchema.safeParse(data)
+  if (paginated.success) {
+    return paginated.data
+  }
+
+  const legacyList = violationsSchema.safeParse(data)
+  if (legacyList.success) {
+    return {
+      items: legacyList.data,
+      total_count: legacyList.data.length,
+      limit,
+      offset,
+    }
+  }
+
+  throw paginated.error
 }
 
 /**
@@ -109,7 +131,7 @@ export async function getViolations(
   const query = params.toString()
   const res = await fetch(`${BASE}/violations${query ? `?${query}` : ''}`)
   if (!res.ok) throw new Error(`Failed to fetch violations: ${res.status}`)
-  return parseJsonResponse(res, (data) => paginatedViolationsSchema.parse(data))
+  return parseJsonResponse(res, (data) => parseViolationsResponse(data, limit, offset))
 }
 
 /**
