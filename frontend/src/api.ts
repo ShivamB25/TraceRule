@@ -1,17 +1,17 @@
 import { z } from 'zod'
 import {
+  paginatedViolationsSchema,
   policyUploadResponseSchema,
   ruleSchema,
   rulesSchema,
   scanResultSchema,
-  violationsSchema,
 } from './types'
 import type {
+  PaginatedViolations,
   PolicyUploadResponse,
   Rule,
   RuleStatus,
   ScanResult,
-  Violation,
   ViolationStatus,
 } from './types'
 
@@ -91,16 +91,25 @@ export async function rejectRule(id: number): Promise<Rule> {
  * Fetches violations with optional rule and status filters.
  * @param ruleId Optional rule id filter.
  * @param status Optional violation status filter.
- * @returns Parsed list of violations.
+ * @param limit Page size.
+ * @param offset Offset for pagination.
+ * @returns Parsed paginated violations.
  */
-export async function getViolations(ruleId?: number, status?: ViolationStatus): Promise<Violation[]> {
+export async function getViolations(
+  ruleId?: number,
+  status?: ViolationStatus,
+  limit = 50,
+  offset = 0,
+): Promise<PaginatedViolations> {
   const params = new URLSearchParams()
   if (ruleId !== undefined) params.set('v3_rule_id', String(ruleId))
   if (status) params.set('status', status)
+  params.set('limit', String(limit))
+  params.set('offset', String(offset))
   const query = params.toString()
   const res = await fetch(`${BASE}/violations${query ? `?${query}` : ''}`)
   if (!res.ok) throw new Error(`Failed to fetch violations: ${res.status}`)
-  return parseJsonResponse(res, (data) => violationsSchema.parse(data))
+  return parseJsonResponse(res, (data) => paginatedViolationsSchema.parse(data))
 }
 
 /**

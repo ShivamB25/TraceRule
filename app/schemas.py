@@ -200,6 +200,13 @@ class V3ViolationResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PaginatedViolationsResponse(BaseModel):
+    items: list[V3ViolationResponse]
+    total_count: int
+    limit: int
+    offset: int
+
+
 class V3ScanResult(BaseModel):
     deterministic_violations: int
     semantic_violations: int

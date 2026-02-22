@@ -1,12 +1,19 @@
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
-from sqlalchemy import select
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    UploadFile,
+)
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session_factory, get_db
 from app.models import V3Rule, V3Violation
 from app.schemas import (
+    PaginatedViolationsResponse,
     V3RuleResponse,
     V3ScanResult,
     V3ViolationResponse,
@@ -112,22 +119,41 @@ async def reject_v3_rule(
     return V3RuleResponse.model_validate(rule)
 
 
-@router.get("/violations", response_model=list[V3ViolationResponse])
+@router.get("/violations", response_model=PaginatedViolationsResponse)
 async def list_v3_violations(
     v3_rule_id: int | None = None,
     status: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
     db: AsyncSession = Depends(get_db),
-) -> list[V3ViolationResponse]:
+) -> PaginatedViolationsResponse:
+    safe_limit = min(max(limit, 1), 500)
+    safe_offset = max(offset, 0)
+
     stmt = select(V3Violation)
+    count_stmt = select(func.count()).select_from(V3Violation)
+
     if v3_rule_id:
         stmt = stmt.where(V3Violation.v3_rule_id == v3_rule_id)
+        count_stmt = count_stmt.where(V3Violation.v3_rule_id == v3_rule_id)
     if status:
         stmt = stmt.where(V3Violation.status == status)
+        count_stmt = count_stmt.where(V3Violation.status == status)
+
     stmt = stmt.order_by(V3Violation.detected_at.desc())
+    stmt = stmt.limit(safe_limit).offset(safe_offset)
+
+    total_result = await db.execute(count_stmt)
+    total_count = int(total_result.scalar_one())
 
     result = await db.execute(stmt)
     violations = result.scalars().all()
-    return [V3ViolationResponse.model_validate(v) for v in violations]
+    return PaginatedViolationsResponse(
+        items=[V3ViolationResponse.model_validate(v) for v in violations],
+        total_count=total_count,
+        limit=safe_limit,
+        offset=safe_offset,
+    )
 
 
 @router.get("/violations/{violation_id}", response_model=V3ViolationResponse)

@@ -62,6 +62,13 @@ export interface Violation {
   status: ViolationStatus
 }
 
+export interface PaginatedViolations {
+  items: Violation[]
+  total_count: number
+  limit: number
+  offset: number
+}
+
 export interface ScanResult {
   deterministic_violations: number
   semantic_violations: number
@@ -111,3 +118,10 @@ export const scanResultSchema = z.object({
 
 export const rulesSchema = z.array(ruleSchema)
 export const violationsSchema = z.array(violationSchema)
+
+export const paginatedViolationsSchema = z.object({
+  items: violationsSchema,
+  total_count: z.number().int().nonnegative(),
+  limit: z.number().int().positive(),
+  offset: z.number().int().nonnegative(),
+})

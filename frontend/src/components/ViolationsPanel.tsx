@@ -5,30 +5,45 @@ import ViolationCard from './ViolationCard'
 interface ViolationsPanelProps {
   violations: Violation[]
   rules: Rule[]
+  totalCount: number
+  currentPage: number
+  pageSize: number
+  totalPages: number
   selectedStatus: 'all' | 'open' | 'resolved'
   selectedRuleId: number | 'all'
   onStatusChange: (value: 'all' | 'open' | 'resolved') => void
   onRuleChange: (value: number | 'all') => void
+  onPrevPage: () => void
+  onNextPage: () => void
   loading: boolean
 }
 
 export default function ViolationsPanel({
   violations,
   rules,
+  totalCount,
+  currentPage,
+  pageSize,
+  totalPages,
   selectedStatus,
   selectedRuleId,
   onStatusChange,
   onRuleChange,
+  onPrevPage,
+  onNextPage,
   loading,
 }: ViolationsPanelProps) {
+  const pageStart = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const pageEnd = Math.min(currentPage * pageSize, totalCount)
+
   return (
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
       <div className="mb-4 space-y-3">
         <div className="mb-1 flex items-center gap-3">
           <h2 className="text-lg font-semibold text-white">Detected Violations</h2>
-          {violations.length > 0 && (
+          {totalCount > 0 && (
             <span className="rounded-full border border-red-500/30 bg-red-500/20 px-2.5 py-0.5 text-xs font-medium text-red-300">
-              {violations.length}
+              {totalCount}
             </span>
           )}
         </div>
@@ -69,7 +84,7 @@ export default function ViolationsPanel({
         </div>
       </div>
 
-      <div className="space-y-4" aria-live="polite">
+        <div className="space-y-4" aria-live="polite">
         {loading ? (
           ['violation-a', 'violation-b'].map((item) => (
             <div key={item} className="animate-pulse rounded-lg border border-slate-700 bg-slate-800/40 p-5">
@@ -78,7 +93,7 @@ export default function ViolationsPanel({
               <div className="mt-2 h-4 w-4/5 rounded bg-slate-700/30" />
             </div>
           ))
-        ) : violations.length === 0 ? (
+        ) : totalCount === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-slate-700 py-12 text-slate-500">
             <ShieldCheck className="h-8 w-8" />
             <p className="text-sm">No violations detected — all records compliant</p>
@@ -89,7 +104,7 @@ export default function ViolationsPanel({
             <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5">
               <AlertTriangle className="h-4 w-4 text-red-300" />
               <p className="text-sm text-red-300">
-                {violations.length} violation{violations.length !== 1 ? 's' : ''} found
+                Showing {pageStart}-{pageEnd} of {totalCount} violation{totalCount !== 1 ? 's' : ''}
               </p>
             </div>
             {violations.map((v, index) => (
@@ -97,6 +112,29 @@ export default function ViolationsPanel({
                 <ViolationCard violation={v} rules={rules} />
               </div>
             ))}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-3 text-xs text-slate-300">
+              <p>
+                Page {currentPage} of {totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onPrevPage}
+                  disabled={currentPage <= 1}
+                  className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={onNextPage}
+                  disabled={currentPage >= totalPages}
+                  className="rounded-md border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>

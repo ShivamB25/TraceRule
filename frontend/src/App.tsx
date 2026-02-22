@@ -20,6 +20,7 @@ import ViolationsPanel from './components/ViolationsPanel'
 type TabStatus = RuleStatus
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+const VIOLATIONS_PAGE_SIZE = 50
 
 function formatTime(date: Date | null): string {
   if (!date) return 'Not refreshed yet'
@@ -32,6 +33,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabStatus>('pending_review')
   const [selectedViolationStatus, setSelectedViolationStatus] = useState<ViolationStatusFilter>('all')
   const [selectedViolationRuleId, setSelectedViolationRuleId] = useState<number | 'all'>('all')
+  const [violationPage, setViolationPage] = useState(1)
+  const [violationTotalCount, setViolationTotalCount] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -72,27 +75,30 @@ export default function App() {
         getViolations(
           selectedViolationRuleId === 'all' ? undefined : selectedViolationRuleId,
           selectedViolationStatus === 'all' ? undefined : selectedViolationStatus,
+          VIOLATIONS_PAGE_SIZE,
+          (violationPage - 1) * VIOLATIONS_PAGE_SIZE,
         ),
       ])
       setRules(nextRules)
-      setViolations(nextViolations)
+      setViolations(nextViolations.items)
+      setViolationTotalCount(nextViolations.total_count)
       setLastUpdatedAt(new Date())
       if (!initialLoadLoggedRef.current) {
         initialLoadLoggedRef.current = true
         pushTimeline({
           kind: 'info',
           title: 'Dashboard loaded',
-          detail: `Fetched ${nextRules.length} rule(s) and ${nextViolations.length} violation(s) from backend`,
+          detail: `Fetched ${nextRules.length} rule(s) and page ${violationPage} of violations (${nextViolations.items.length}/${nextViolations.total_count})`,
           request: 'GET /api/v3/rules + GET /api/v3/violations',
-          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.length}`,
+          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
         })
       } else if (showSpinner) {
         pushTimeline({
           kind: 'info',
           title: 'Manual refresh complete',
-          detail: `Now showing ${nextRules.length} rule(s) and ${nextViolations.length} violation(s)`,
+          detail: `Now showing ${nextRules.length} rule(s) and violation page ${violationPage} (${nextViolations.items.length}/${nextViolations.total_count})`,
           request: 'GET /api/v3/rules + GET /api/v3/violations',
-          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.length}`,
+          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
         })
       }
     } catch (err) {
@@ -108,11 +114,18 @@ export default function App() {
       if (showSpinner) setRefreshing(false)
       setLoadingInitial(false)
     }
-  }, [pushTimeline, selectedViolationRuleId, selectedViolationStatus])
+  }, [pushTimeline, selectedViolationRuleId, selectedViolationStatus, violationPage])
 
   useEffect(() => {
     void refreshData()
   }, [refreshData])
+
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(violationTotalCount / VIOLATIONS_PAGE_SIZE))
+    if (violationPage > totalPages) {
+      setViolationPage(totalPages)
+    }
+  }, [violationPage, violationTotalCount])
 
   useEffect(() => {
     if (!lastUpload || lastUpload.status !== 'processing') return
@@ -192,6 +205,7 @@ export default function App() {
       setLastUpload(result)
       setSelectedViolationStatus('all')
       setSelectedViolationRuleId('all')
+      setViolationPage(1)
       pushTimeline({
         kind: 'success',
         title: 'Upload accepted',
@@ -258,8 +272,11 @@ export default function App() {
       const fresh = await getViolations(
         selectedViolationRuleId === 'all' ? undefined : selectedViolationRuleId,
         selectedViolationStatus === 'all' ? undefined : selectedViolationStatus,
+        VIOLATIONS_PAGE_SIZE,
+        (violationPage - 1) * VIOLATIONS_PAGE_SIZE,
       )
-      setViolations(fresh)
+      setViolations(fresh.items)
+      setViolationTotalCount(fresh.total_count)
       setLastUpdatedAt(new Date())
       pushTimeline({
         kind: result.total > 0 ? 'warning' : 'success',
@@ -276,6 +293,8 @@ export default function App() {
       setScanning(false)
     }
   }
+
+  const totalViolationPages = Math.max(1, Math.ceil(violationTotalCount / VIOLATIONS_PAGE_SIZE))
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-slate-950 text-white">
@@ -328,7 +347,7 @@ export default function App() {
           totalRules={rules.length}
           approvedRules={rules.filter((rule) => rule.status === 'approved').length}
           pendingRules={rules.filter((rule) => rule.status === 'pending_review').length}
-          totalViolations={violations.length}
+          totalViolations={violationTotalCount}
           loading={loadingInitial}
         />
 
@@ -347,10 +366,22 @@ export default function App() {
           <ViolationsPanel
             violations={violations}
             rules={rules}
+            totalCount={violationTotalCount}
+            currentPage={violationPage}
+            pageSize={VIOLATIONS_PAGE_SIZE}
+            totalPages={totalViolationPages}
             selectedStatus={selectedViolationStatus}
             selectedRuleId={selectedViolationRuleId}
-            onStatusChange={setSelectedViolationStatus}
-            onRuleChange={setSelectedViolationRuleId}
+            onStatusChange={(value) => {
+              setSelectedViolationStatus(value)
+              setViolationPage(1)
+            }}
+            onRuleChange={(value) => {
+              setSelectedViolationRuleId(value)
+              setViolationPage(1)
+            }}
+            onPrevPage={() => setViolationPage((prev) => Math.max(1, prev - 1))}
+            onNextPage={() => setViolationPage((prev) => Math.min(totalViolationPages, prev + 1))}
             loading={loadingInitial}
           />
         </ErrorBoundary>
