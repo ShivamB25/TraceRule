@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import JSON, TypeDecorator
 
-from pgvector.sqlalchemy import Vector
-
 
 # ---------------------------------------------------------------------------
 # Type helpers
@@ -24,22 +22,6 @@ class JSONVariant(TypeDecorator):
         if dialect.name == "postgresql":
             return dialect.type_descriptor(JSONB())
         return dialect.type_descriptor(JSON())
-
-
-class VectorVariant(TypeDecorator):
-    """pgvector Vector on Postgres, plain Text elsewhere (SQLite tests)."""
-
-    impl = Text
-    cache_ok = True
-
-    def __init__(self, dim: int = 1536):
-        super().__init__()
-        self.dim = dim
-
-    def load_dialect_impl(self, dialect):
-        if dialect.name == "postgresql":
-            return dialect.type_descriptor(Vector(self.dim))
-        return dialect.type_descriptor(Text())
 
 
 class TSVectorVariant(TypeDecorator):
@@ -110,11 +92,11 @@ class Violation(Base):
 
 
 class CompanyRecord(Base):
-    """Universal record store with hybrid search columns.
+    """Universal record store for BM25 full-text search.
 
-    Every business table row is flattened into this table so the scanner
-    can query it uniformly via deterministic SQL, pgvector cosine search,
-    and Postgres full-text BM25 ranking.
+    Business table rows are flattened here so the scanner can run
+    Postgres-native ts_rank BM25 ranking for pure-vague policy clauses.
+    Deterministic and mixed rules query target tables directly via SQL.
     """
 
     __tablename__ = "company_records"
@@ -126,9 +108,6 @@ class CompanyRecord(Base):
     data_payload: Mapped[dict] = mapped_column(JSONVariant)
     search_text: Mapped[str] = mapped_column(
         Text, comment="Concatenated text for BM25 full-text search"
-    )
-    embedding: Mapped[list] = mapped_column(
-        VectorVariant(1536), nullable=True, comment="OpenAI / Anthropic embedding"
     )
     ts_vector: Mapped[str] = mapped_column(
         TSVectorVariant(), nullable=True, comment="Postgres tsvector for ts_rank"
@@ -170,7 +149,7 @@ class V3Violation(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     v3_rule_id: Mapped[int] = mapped_column(ForeignKey("v3_rules.id"))
-    record_id: Mapped[int] = mapped_column(ForeignKey("company_records.id"))
+    record_id: Mapped[int]
     violation_data: Mapped[dict] = mapped_column(JSONVariant)
     verdict_reasoning: Mapped[str | None] = mapped_column(
         comment="Chief Justice reasoning for semantic violations"

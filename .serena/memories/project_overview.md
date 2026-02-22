@@ -1,58 +1,41 @@
-# TraceRule — Project overview (quick reference)
+# TraceRule — Project Overview
 
-Deterministic compliance compiler. PDF in, PostgreSQL queries out, human approves, scheduler scans.
+Neuro-symbolic compliance compiler. Policy PDFs in → deontic logic ASTs + PostgreSQL queries out → human approves → scheduler scans → adversarial courtroom judges subjective clauses.
 
-## Pipeline
+## Two Pipelines (V1 + V3 coexist)
 
-1. **Ingest**: POST /upload → pymupdf4llm → Claude compiler agent → SQL rules (status=pending_review)
-2. **Review**: Human approves/rejects each SQL rule via PATCH endpoint
-3. **Scan**: APScheduler runs approved SQL every N minutes, logs violations, no LLM involved
+### V1 Pipeline (original, still works)
+1. POST /api/v1/policies/upload → pymupdf4llm → Claude compiler agent → raw SQL rules (status=pending_review)
+2. Human approves/rejects via PATCH
+3. APScheduler runs approved SQL every N minutes, logs violations, generates AI explanations
+
+### V3 Pipeline (neuro-symbolic, current focus)
+1. POST /api/v3/policies/upload → pymupdf4llm → Global Ontology extraction → Claude extractor agent → Deontic Logic AST (LogicNode/Condition trees) → AST compiler → SQL with `1=1` for vague clauses
+2. Extractor agent has `@output_validator` reflexion — runs `EXPLAIN` on generated SQL, bounces Postgres errors back to Claude via `ModelRetry`
+3. Human approves/rejects V3 rules via PATCH
+4. Scanner runs approved rules:
+   - **Pure deterministic** (no IS_VAGUE): Execute compiled SQL, save violations (confidence=1.0)
+   - **Mixed** (deterministic + IS_VAGUE): SQL pre-filter returns superset (IS_VAGUE=`1=1`), then adversarial courtroom evaluates each candidate
+   - **Pure vague**: BM25 text search on company_records → courtroom evaluates candidates
+5. Courtroom: Prosecutor + Defender run in parallel via asyncio.gather, Chief Justice renders final Verdict with confidence_score
 
 ## Stack
 
-Python >=3.13, FastAPI, PydanticAI (claude-sonnet-4-6 with adaptive thinking), SQLAlchemy 2.x async (asyncpg), APScheduler 3.x, pymupdf4llm. Package manager: uv.
+Python >=3.13, FastAPI, PydanticAI (claude-sonnet-4-6), SQLAlchemy 2.x async (asyncpg), APScheduler 3.x, pymupdf4llm. Package manager: uv.
 
-## Live-tested (2026-02-21)
-
-Full end-to-end pipeline verified with live Anthropic API:
-- PDF upload → Claude compiles 3 rules from employee policy → correct SQL generated
-- HITL approve → scan detects 6 violations across 7 employees → AI explanations generated
-- Dedup confirmed: re-scan returns 0 new violations
-- All edge cases pass: 404s, 422s, 400 bad status, filter params
+**Removed:** pgvector, numpy (embedding structured data is an anti-pattern; courtroom IS the semantic reranker)
 
 ## Config (.env)
 
-- `DATABASE_URL` — Postgres connection string
-- `ANTHROPIC_API_KEY` — required for compilation (bridged to os.environ by config.py)
+- `DATABASE_URL` — Postgres connection string (asyncpg)
+- `ANTHROPIC_API_KEY` — required for compilation + courtroom
 - `SCAN_INTERVAL_MINUTES` — default 5
+- `EXPLANATION_MODEL_LIMIT_PER_SCAN` — default 25
 
-## Gotchas discovered during live testing
+## Test State
 
-- PydanticAI reads `ANTHROPIC_API_KEY` from `os.environ`, not from pydantic-settings. Config.py bridges this gap.
-- PostgreSQL `NUMERIC` columns return `Decimal` objects. Scanner's `_make_json_safe()` coerces them to `float` before JSONB insert.
-- `pymupdf4llm.to_markdown()` returns `str | list[dict]` — runtime type narrowing in ingestion.py.
+76 tests across 10 files, all passing. In-memory SQLite via aiosqlite. No API key needed for tests.
 
 ## Forbidden
 
-LangChain, LangGraph, Instructor, Celery, Redis, Docling, Alembic.
-
-
-## Recent updates (2026-02-22)
-
-- Upload/ingestion policy consistency fix: background ingestion now uses the same `policy_id` created by upload route (no duplicate policy row for one upload).
-- Frontend now includes a dedicated live request timeline panel with endpoint-level technical trace mode.
-- Demo data workflow no longer requires full AML unzip; capped extraction + loader scripts support 1-2GB demo footprint.
-
-
-## Baseline decisions kept from 2026-02-21
-
-- Compiler uses `claude-sonnet-4-6` with adaptive thinking at `high` effort.
-- Explainer uses the same model with adaptive thinking at `medium` effort.
-- `/scan` route uses `Depends(get_db)` (not manual session factory) to keep tests isolated.
-- Pytest config is centralized in `pyproject.toml` (no separate `pytest.ini`).
-- Docker build follows multi-stage uv pattern; Python baseline is `>=3.13`.
-
-## Validation snapshot
-
-- Backend regression suite: 23 tests passing across rules, violations, scanner, and policies.
-- Live E2E snapshot: 3 compiled rules, 6 violations from 7 records, and re-scan dedup produced 0 new violations.
+LangChain, LangGraph, Instructor, Celery, Redis, Docling, Alembic, pgvector, numpy.
