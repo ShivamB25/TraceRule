@@ -147,13 +147,6 @@ class SymbolicRule(BaseModel):
 
 
 class SymbolicRuleDraft(BaseModel):
-    """Extractor-friendly non-recursive shape.
-
-    The Anthropic schema validator can reject recursive-only JSON schema fragments.
-    This draft model keeps `logic_tree` as raw JSON and we validate it into a
-    `LogicNode` server-side before persistence.
-    """
-
     rule_id: str
     title: str = Field(description="Human-readable rule name")
     source_quote: str = Field(

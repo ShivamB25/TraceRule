@@ -37,6 +37,7 @@ def _build_model() -> AnthropicModel:
 
 _THINKING_SETTINGS = AnthropicModelSettings(
     anthropic_thinking={"type": "enabled", "budget_tokens": 8000},
+    max_tokens=16000,
 )
 
 
@@ -75,6 +76,7 @@ def _get_chief_justice() -> Agent[None, Verdict]:
         output_type=Verdict,
         model_settings=AnthropicModelSettings(
             anthropic_thinking={"type": "enabled", "budget_tokens": 16000},
+            max_tokens=32000,
         ),
         instructions=(
             "You are the Chief Justice presiding over a compliance case. "

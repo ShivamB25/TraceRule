@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ast_compiler import compile_ast_to_sql
 from app.config import settings
-from app.schemas import GlobalOntology, SymbolicRule
+from app.schemas import GlobalOntology, LogicNode, SymbolicRuleDraft
 
 logger = logging.getLogger(__name__)
 
@@ -39,18 +39,19 @@ _INSTRUCTIONS = (
 
 
 @lru_cache(maxsize=1)
-def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRule]]:
+def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRuleDraft]]:
     model = AnthropicModel(
         "claude-sonnet-4-6",
         provider=AnthropicProvider(api_key=settings.anthropic_api_key),
     )
-    agent: Agent[ExtractorDeps, list[SymbolicRule]] = Agent(
+    agent: Agent[ExtractorDeps, list[SymbolicRuleDraft]] = Agent(
         model,
         deps_type=ExtractorDeps,
-        output_type=list[SymbolicRule],
+        output_type=list[SymbolicRuleDraft],
         retries=4,
         model_settings=AnthropicModelSettings(
             anthropic_thinking={"type": "enabled", "budget_tokens": 16000},
+            max_tokens=32000,
         ),
         instructions=_INSTRUCTIONS,
     )
@@ -74,10 +75,18 @@ def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRule]]:
 
     @agent.output_validator
     async def validate_sql_sandbox(
-        ctx: RunContext[ExtractorDeps], result: list[SymbolicRule]
-    ) -> list[SymbolicRule]:
+        ctx: RunContext[ExtractorDeps], result: list[SymbolicRuleDraft]
+    ) -> list[SymbolicRuleDraft]:
         for rule in result:
-            sql_where = compile_ast_to_sql(rule.logic_tree)
+            try:
+                logic_tree = LogicNode.model_validate(rule.logic_tree)
+            except Exception as e:
+                raise ModelRetry(
+                    f"Invalid logic_tree for rule '{rule.rule_id}': {e}. "
+                    "Return a valid LogicNode with logic_type and children."
+                )
+
+            sql_where = compile_ast_to_sql(logic_tree)
             test_sql = f"SELECT id FROM {rule.target_table} WHERE {sql_where} LIMIT 1"
 
             try:

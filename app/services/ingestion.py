@@ -10,7 +10,7 @@ from app.agents.compiler import CompilerDeps, get_compiler_agent
 from app.agents.extractor import ExtractorDeps, get_extractor_agent
 from app.models import Policy, Rule, V3Rule
 from app.config import settings
-from app.schemas import GlobalOntology
+from app.schemas import GlobalOntology, LogicNode
 
 logger = logging.getLogger(__name__)
 
@@ -211,6 +211,7 @@ async def _extract_global_ontology(full_text: str) -> GlobalOntology:
         output_type=GlobalOntology,
         model_settings=AnthropicModelSettings(
             anthropic_thinking={"type": "enabled", "budget_tokens": 4000},
+            max_tokens=8000,
         ),
         instructions=_LEXICON_INSTRUCTIONS,
     )
@@ -260,6 +261,7 @@ async def ingest_policy_v3(
             try:
                 extraction = await get_extractor_agent().run(prompt, deps=deps)
                 for symbolic_rule in extraction.output:
+                    logic_tree = LogicNode.model_validate(symbolic_rule.logic_tree)
                     v3_rule = V3Rule(
                         policy_id=policy_id,
                         rule_id=symbolic_rule.rule_id,
@@ -267,7 +269,7 @@ async def ingest_policy_v3(
                         source_quote=symbolic_rule.source_quote,
                         severity=symbolic_rule.severity,
                         target_table=symbolic_rule.target_table,
-                        logic_tree_json=symbolic_rule.logic_tree.model_dump(),
+                        logic_tree_json=logic_tree.model_dump(),
                         requires_semantic_scan=symbolic_rule.requires_semantic_scan,
                         compiled_sql=symbolic_rule.compiled_sql,
                         status="pending_review",
