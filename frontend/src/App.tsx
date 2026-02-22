@@ -20,7 +20,8 @@ import ViolationsPanel from './components/ViolationsPanel'
 type TabStatus = RuleStatus
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-const VIOLATIONS_PAGE_SIZE = 50
+const VIOLATIONS_PAGE_SIZE = 25
+const MAX_TIMELINE_EVENTS = 30
 
 function formatTime(date: Date | null): string {
   if (!date) return 'Not refreshed yet'
@@ -46,6 +47,7 @@ export default function App() {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([])
   const [liveAnnouncement, setLiveAnnouncement] = useState('')
   const initialLoadLoggedRef = useRef(false)
+  const refreshRequestIdRef = useRef(0)
 
   const announce = useCallback((message: string): void => {
     setLiveAnnouncement('')
@@ -59,7 +61,7 @@ export default function App() {
         at: new Date(),
         ...event,
       }
-      return [next, ...prev].slice(0, 30)
+      return [next, ...prev].slice(0, MAX_TIMELINE_EVENTS)
     })
     announce(event.title)
   }, [announce])
@@ -68,6 +70,8 @@ export default function App() {
   const extractedCount = lastUpload ? rules.filter((rule) => rule.policy_id === lastUpload.id).length : 0
 
   const refreshData = useCallback(async (showSpinner = false): Promise<void> => {
+    const requestId = refreshRequestIdRef.current + 1
+    refreshRequestIdRef.current = requestId
     if (showSpinner) setRefreshing(true)
     try {
       const [nextRules, nextViolations] = await Promise.all([
@@ -79,40 +83,46 @@ export default function App() {
           (violationPage - 1) * VIOLATIONS_PAGE_SIZE,
         ),
       ])
-      setRules(nextRules)
-      setViolations(nextViolations.items)
-      setViolationTotalCount(nextViolations.total_count)
-      setLastUpdatedAt(new Date())
-      if (!initialLoadLoggedRef.current) {
-        initialLoadLoggedRef.current = true
-        pushTimeline({
-          kind: 'info',
-          title: 'Dashboard loaded',
-          detail: `Fetched ${nextRules.length} rule(s) and page ${violationPage} of violations (${nextViolations.items.length}/${nextViolations.total_count})`,
-          request: 'GET /api/v3/rules + GET /api/v3/violations',
-          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
-        })
-      } else if (showSpinner) {
-        pushTimeline({
-          kind: 'info',
-          title: 'Manual refresh complete',
-          detail: `Now showing ${nextRules.length} rule(s) and violation page ${violationPage} (${nextViolations.items.length}/${nextViolations.total_count})`,
-          request: 'GET /api/v3/rules + GET /api/v3/violations',
-          response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
-        })
+      if (requestId === refreshRequestIdRef.current) {
+        setRules(nextRules)
+        setViolations(nextViolations.items)
+        setViolationTotalCount(nextViolations.total_count)
+        setLastUpdatedAt(new Date())
+        if (!initialLoadLoggedRef.current) {
+          initialLoadLoggedRef.current = true
+          pushTimeline({
+            kind: 'info',
+            title: 'Dashboard loaded',
+            detail: `Fetched ${nextRules.length} rule(s) and page ${violationPage} of violations (${nextViolations.items.length}/${nextViolations.total_count})`,
+            request: 'GET /api/v3/rules + GET /api/v3/violations',
+            response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
+          })
+        } else if (showSpinner) {
+          pushTimeline({
+            kind: 'info',
+            title: 'Manual refresh complete',
+            detail: `Now showing ${nextRules.length} rule(s) and violation page ${violationPage} (${nextViolations.items.length}/${nextViolations.total_count})`,
+            request: 'GET /api/v3/rules + GET /api/v3/violations',
+            response: `200 OK, rules=${nextRules.length}, violations=${nextViolations.items.length}, total=${nextViolations.total_count}`,
+          })
+        }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load data'
-      setError(message)
-      pushTimeline({
-        kind: 'error',
-        title: 'Data refresh failed',
-        detail: message,
-        request: 'GET /api/v3/rules + GET /api/v3/violations',
-      })
+      if (requestId === refreshRequestIdRef.current) {
+        const message = err instanceof Error ? err.message : 'Failed to load data'
+        setError(message)
+        pushTimeline({
+          kind: 'error',
+          title: 'Data refresh failed',
+          detail: message,
+          request: 'GET /api/v3/rules + GET /api/v3/violations',
+        })
+      }
     } finally {
-      if (showSpinner) setRefreshing(false)
-      setLoadingInitial(false)
+      if (requestId === refreshRequestIdRef.current) {
+        if (showSpinner) setRefreshing(false)
+        setLoadingInitial(false)
+      }
     }
   }, [pushTimeline, selectedViolationRuleId, selectedViolationStatus, violationPage])
 

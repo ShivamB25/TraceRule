@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { ShieldCheck, AlertTriangle } from 'lucide-react'
 import type { Violation, Rule } from '../types'
 import ViolationCard from './ViolationCard'
@@ -35,6 +36,14 @@ export default function ViolationsPanel({
 }: ViolationsPanelProps) {
   const pageStart = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
   const pageEnd = Math.min(currentPage * pageSize, totalCount)
+  const animateCards = violations.length <= 20
+  const ruleTitleById = useMemo(() => {
+    const next = new Map<number, string>()
+    for (const rule of rules) {
+      next.set(rule.id, rule.title)
+    }
+    return next
+  }, [rules])
 
   return (
     <section className="rounded-xl border border-slate-700/90 bg-slate-900/90 p-6 shadow-[var(--shadow-panel)]">
@@ -108,8 +117,12 @@ export default function ViolationsPanel({
               </p>
             </div>
             {violations.map((v, index) => (
-              <div key={v.id} className="animate-fade-slide" style={{ animationDelay: `${index * 45}ms` }}>
-                <ViolationCard violation={v} rules={rules} />
+              <div
+                key={v.id}
+                className={animateCards ? 'animate-fade-slide [content-visibility:auto] [contain-intrinsic-size:280px]' : '[content-visibility:auto] [contain-intrinsic-size:280px]'}
+                style={animateCards ? { animationDelay: `${index * 45}ms` } : undefined}
+              >
+                <ViolationCard violation={v} ruleTitle={ruleTitleById.get(v.v3_rule_id)} />
               </div>
             ))}
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-3 text-xs text-slate-300">
