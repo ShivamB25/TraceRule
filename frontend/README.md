@@ -50,7 +50,6 @@ src/
     ├── UploadPanel.tsx      # PDF drag-and-drop upload
     ├── PipelineStrip.tsx    # 3-phase pipeline visualization
     ├── StatsBar.tsx         # Rule/violation counters
-    ├── StatsBar.tsx         # Rule/violation counters
     ├── RequestTimeline.tsx  # Live API request log
     ├── ReviewPanel.tsx      # Tabbed rule review
     ├── RuleCard.tsx         # Single rule with approve/reject

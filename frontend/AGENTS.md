@@ -69,11 +69,11 @@ frontend/
 
 ## CONVENTIONS
 
- **Component pattern**: Functional + explicit props interface. One class component (ErrorBoundary). No HOCs, no render props.
+- **Component pattern**: Functional + explicit props interface. One class component (ErrorBoundary). No HOCs, no render props.
 - **State management**: All in App.tsx via useState. No Context, Redux, or Zustand. Props drill down.
 - **Data fetching**: Vanilla `fetch()` in `api.ts`. No React Query, SWR, or axios.
 - **Polling**: Manual `setInterval` in useEffect. Compilation polls at 3s (40 attempts max).
- **Memoization**: `refreshData` and `pushTimeline` wrapped in `useCallback`. `PipelineStrip`, `SeverityBadge`, and `SqlBlock` use `React.memo`. Other handlers are plain async functions.
+- **Memoization**: `refreshData` and `pushTimeline` wrapped in `useCallback`. `PipelineStrip`, `SeverityBadge`, and `SqlBlock` use `React.memo`. Other handlers are plain async functions.
 - **Icons**: `lucide-react` only. Import individual icons.
 - **Styling**: Tailwind utility classes inline. Dark theme: `slate-950` bg, blue/cyan/emerald accents.
 - **Fonts**: Space Grotesk (headings, 500-700), IBM Plex Sans (body, 400-600). Loaded via Google Fonts in `index.css`.
@@ -107,7 +107,7 @@ bun run preview                      # Preview production build
 ## NOTES
 
 - **Frontend tests exist**: Vitest tests for API and key components (`src/api.test.ts`, `src/components/*.test.tsx`).
- **Error boundary exists**: `ErrorBoundary.tsx` wraps `ReviewPanel` and `ViolationsPanel` in App.tsx. Render errors in those sections show a retry prompt instead of crashing the full page.
+- **Error boundary exists**: `ErrorBoundary.tsx` wraps `ReviewPanel` and `ViolationsPanel` in App.tsx. Render errors in those sections show a retry prompt instead of crashing the full page.
 - **No router** — entire UI is a single dashboard view. Tabs are state-driven, not URL-driven.
 - **StrictMode** in dev causes double-mount; `initialLoadLoggedRef` prevents duplicate timeline entries.
 - **API base**: Hardcoded `'/api/v3'` in `api.ts`. Vite proxy handles routing to backend in dev. In production, configure reverse proxy.

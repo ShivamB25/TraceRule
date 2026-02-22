@@ -146,6 +146,30 @@ class SymbolicRule(BaseModel):
     compiled_sql: str | None = None
 
 
+class SymbolicRuleDraft(BaseModel):
+    """Extractor-friendly non-recursive shape.
+
+    The Anthropic schema validator can reject recursive-only JSON schema fragments.
+    This draft model keeps `logic_tree` as raw JSON and we validate it into a
+    `LogicNode` server-side before persistence.
+    """
+
+    rule_id: str
+    title: str = Field(description="Human-readable rule name")
+    source_quote: str = Field(
+        description="Exact quote from policy text for audit trail"
+    )
+    severity: str = Field(
+        default="MEDIUM", description="CRITICAL, HIGH, MEDIUM, or LOW"
+    )
+    target_table: str = Field(description="DB table this rule scans against")
+    logic_tree: dict[str, Any]
+    requires_semantic_scan: bool = Field(
+        description="True if ANY condition in the tree uses IS_VAGUE operator"
+    )
+    compiled_sql: str | None = None
+
+
 # ---------------------------------------------------------------------------
 # V3 response schemas
 # ---------------------------------------------------------------------------
