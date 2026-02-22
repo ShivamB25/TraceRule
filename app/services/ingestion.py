@@ -1,5 +1,6 @@
 import logging
 import tempfile
+from time import perf_counter
 from pathlib import Path
 
 import pymupdf4llm
@@ -215,8 +216,15 @@ async def _extract_global_ontology(full_text: str) -> GlobalOntology:
         ),
         instructions=_LEXICON_INSTRUCTIONS,
     )
-    result = await lexicon_agent.run(full_text[:12000])
-    return result.output
+    started = perf_counter()
+    async with lexicon_agent.run_stream(full_text[:12000]) as response:
+        output = await response.get_output()
+    logger.info(
+        "Global ontology extraction completed in %.2fs (input_chars=%d)",
+        perf_counter() - started,
+        len(full_text),
+    )
+    return output
 
 
 async def ingest_policy_v3(
@@ -255,12 +263,21 @@ async def ingest_policy_v3(
 
         chunks = _chunk_policy_text(markdown_text)
         all_rules: list[V3Rule] = []
+        logger.info(
+            "Starting V3 extraction for policy %d across %d chunk(s)",
+            policy_id,
+            len(chunks),
+        )
 
         for i, chunk in enumerate(chunks):
             prompt = f"[Chunk {i + 1}/{len(chunks)}]\n\n{chunk}"
             try:
-                extraction = await get_extractor_agent().run(prompt, deps=deps)
-                for symbolic_rule in extraction.output:
+                chunk_started = perf_counter()
+                async with get_extractor_agent().run_stream(
+                    prompt, deps=deps
+                ) as response:
+                    extracted_rules = await response.get_output()
+                for symbolic_rule in extracted_rules:
                     logic_tree = LogicNode.model_validate(symbolic_rule.logic_tree)
                     v3_rule = V3Rule(
                         policy_id=policy_id,
@@ -276,17 +293,26 @@ async def ingest_policy_v3(
                     )
                     db.add(v3_rule)
                     all_rules.append(v3_rule)
-            except Exception as e:
-                logger.error(
-                    "V3 extraction failed for policy %d chunk %d: %s",
+                logger.info(
+                    "V3 extraction succeeded for policy %d chunk %d/%d in %.2fs (rules=%d)",
                     policy_id,
-                    i,
+                    i + 1,
+                    len(chunks),
+                    perf_counter() - chunk_started,
+                    len(extracted_rules),
+                )
+            except Exception as e:
+                logger.exception(
+                    "V3 extraction failed for policy %d chunk %d/%d: %s",
+                    policy_id,
+                    i + 1,
+                    len(chunks),
                     e,
                 )
 
         policy.status = "completed" if all_rules else "failed"
     except Exception as e:
-        logger.error("V3 ingestion failed for policy %d: %s", policy_id, e)
+        logger.exception("V3 ingestion failed for policy %d: %s", policy_id, e)
         policy.status = "failed"
 
     await db.commit()

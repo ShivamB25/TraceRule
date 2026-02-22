@@ -78,7 +78,7 @@ async def run_deterministic_scan(db: AsyncSession) -> int:
                 known_pks.add(pk)
                 violation_count += 1
         except Exception as e:
-            logger.error("SQL execution failed for rule %d: %s", rule["id"], e)
+            logger.exception("SQL execution failed for rule %d: %s", rule["id"], e)
 
     await db.commit()
 
@@ -141,7 +141,7 @@ async def _explain_new_violations(
                 {"explanation": explanation_result.output, "id": row["id"]},
             )
         except Exception as e:
-            logger.error("Explanation failed for violation %d: %s", row["id"], e)
+            logger.exception("Explanation failed for violation %d: %s", row["id"], e)
             await db.execute(
                 text(
                     "UPDATE violations SET ai_explanation = :explanation WHERE id = :id"
@@ -278,7 +278,7 @@ async def _scan_deterministic_v3(
             known_ids.add(record_id)
             count += 1
     except Exception as e:
-        logger.error("V3 deterministic scan failed for rule %d: %s", rule_pk, e)
+        logger.exception("V3 deterministic scan failed for rule %d: %s", rule_pk, e)
 
     return count
 
@@ -317,7 +317,7 @@ async def _scan_semantic_v3(
                 for r in candidate_result.mappings().all()
             ]
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "SQL pre-filter failed for rule %d: %s — falling back to BM25",
                 rule_pk,
                 e,
@@ -369,7 +369,7 @@ async def _scan_semantic_v3(
                 known_ids.add(record_id)
                 count += 1
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Courtroom debate failed for record %s on rule %d: %s",
                 record_id,
                 rule_pk,

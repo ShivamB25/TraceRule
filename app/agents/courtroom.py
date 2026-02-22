@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from functools import lru_cache
+from time import perf_counter
 
 from pydantic import BaseModel, Field
 
@@ -89,19 +90,35 @@ def _get_chief_justice() -> Agent[None, Verdict]:
 
 async def run_semantic_debate(record_data: dict, rule_rubric: str) -> Verdict:
     context = f"RULE RUBRIC: {rule_rubric}\nRECORD EVIDENCE: {record_data}"
+    started = perf_counter()
 
-    pros_task = _get_prosecutor().run(
-        f"Argue why this record VIOLATES the rule.\n{context}"
+    pros_task = _run_legal_argument_stream(
+        _get_prosecutor(),
+        f"Argue why this record VIOLATES the rule.\n{context}",
     )
-    def_task = _get_defender().run(
-        f"Argue why this record COMPLIES with the rule (find loopholes).\n{context}"
+    def_task = _run_legal_argument_stream(
+        _get_defender(),
+        f"Argue why this record COMPLIES with the rule (find loopholes).\n{context}",
     )
     pros_res, def_res = await asyncio.gather(pros_task, def_task)
 
-    verdict_result = await _get_chief_justice().run(
-        f"Prosecution Argument: {pros_res.output.model_dump_json()}\n"
-        f"Defense Argument: {def_res.output.model_dump_json()}\n"
+    async with _get_chief_justice().run_stream(
+        f"Prosecution Argument: {pros_res.model_dump_json()}\n"
+        f"Defense Argument: {def_res.model_dump_json()}\n"
         f"Original context: {context}\n"
         f"Issue your final verdict."
+    ) as response:
+        verdict = await response.get_output()
+
+    logger.info(
+        "Courtroom semantic debate completed in %.2fs", perf_counter() - started
     )
-    return verdict_result.output
+    return verdict
+
+
+async def _run_legal_argument_stream(
+    agent: Agent[None, LegalArgument],
+    prompt: str,
+) -> LegalArgument:
+    async with agent.run_stream(prompt) as response:
+        return await response.get_output()
