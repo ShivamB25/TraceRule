@@ -16,6 +16,7 @@ dependencies = [
     "python-multipart>=0.0.22",
     "sqlalchemy[asyncio]>=2.0.46",
     "uvicorn[standard]>=0.41.0",
+    "logfire[asyncpg,fastapi,httpx]>=4.0.0",
 ]
 
 [dependency-groups]

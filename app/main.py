@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 
+import logfire
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
@@ -10,6 +11,12 @@ from app.config import settings
 from app.database import async_session_factory, engine
 from app.models import Base
 from app.services.scanner import run_deterministic_scan
+
+# ── Logfire: agent + HTTP observability ──────────────────────────
+logfire.configure(send_to_logfire="if-token-present")
+logfire.instrument_pydantic_ai()
+logfire.instrument_httpx(capture_all=True)
+logfire.instrument_asyncpg()
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +53,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="TraceRule", version="3.0.0", lifespan=lifespan)
+logfire.instrument_fastapi(app)
 
 
 @app.get("/health")

@@ -273,12 +273,10 @@ async def ingest_policy_v3(
             prompt = f"[Chunk {i + 1}/{len(chunks)}]\n\n{chunk}"
             try:
                 chunk_started = perf_counter()
-                async with get_extractor_agent().run_stream(
-                    prompt, deps=deps
-                ) as response:
-                    extracted_rules = await response.get_output()
+                result = await get_extractor_agent().run(prompt, deps=deps)
+                extracted_rules = result.output
                 for symbolic_rule in extracted_rules:
-                    logic_tree = LogicNode.model_validate(symbolic_rule.logic_tree)
+                    logic_tree = LogicNode.model_validate_json(symbolic_rule.logic_tree)
                     v3_rule = V3Rule(
                         policy_id=policy_id,
                         rule_id=symbolic_rule.rule_id,

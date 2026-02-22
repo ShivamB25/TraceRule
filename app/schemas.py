@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Union
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
@@ -106,7 +106,7 @@ class Condition(BaseModel):
         "IS_NOT_NULL",
         "IS_VAGUE",
     ]
-    value: Any | None = None
+    value: str | int | float | bool | None = None
     semantic_rubric: str | None = Field(
         default=None,
         description=(
@@ -123,7 +123,6 @@ class LogicNode(BaseModel):
     children: list[Union[LogicNode, Condition]]
 
 
-# Pydantic V2 requires explicit rebuild for recursive models
 LogicNode.model_rebuild()
 
 
@@ -156,7 +155,12 @@ class SymbolicRuleDraft(BaseModel):
         default="MEDIUM", description="CRITICAL, HIGH, MEDIUM, or LOW"
     )
     target_table: str = Field(description="DB table this rule scans against")
-    logic_tree: dict[str, Any]
+    logic_tree: str = Field(
+        description=(
+            "JSON string for a LogicNode object with keys logic_type and children. "
+            'Example: {"logic_type":"AND","children":[{"subject_column":"amount_paid","operator":">","value":10000}]}'
+        )
+    )
     requires_semantic_scan: bool = Field(
         description="True if ANY condition in the tree uses IS_VAGUE operator"
     )

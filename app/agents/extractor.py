@@ -1,4 +1,5 @@
 import logging
+import json
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -25,7 +26,7 @@ class ExtractorDeps:
 
 _INSTRUCTIONS = (
     "You are TraceRule V3, a neuro-symbolic compliance compiler.\n\n"
-    "Convert policy text into a SymbolicRule with a deontic logic AST.\n\n"
+    "Convert policy text into SymbolicRuleDraft objects with deontic logic ASTs.\n\n"
     "RULES:\n"
     "1. Map each enforceable clause to a LogicNode tree of Conditions.\n"
     "2. Use EXACT column names from the database schema provided.\n"
@@ -34,7 +35,7 @@ _INSTRUCTIONS = (
     "4. Set requires_semantic_scan=True if ANY Condition uses IS_VAGUE.\n"
     "5. Use UNLESS for legal exceptions (defeasible reasoning).\n"
     "6. The compiled_sql field will be auto-generated — leave it as None.\n"
-    "7. Consult the Global Ontology for acronym/term definitions."
+    "7. Consult the Global Ontology for acronym/term definitions.\n"
 )
 
 
@@ -50,8 +51,8 @@ def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRuleDraft]]:
         output_type=list[SymbolicRuleDraft],
         retries=4,
         model_settings=AnthropicModelSettings(
-            anthropic_thinking={"type": "enabled", "budget_tokens": 16000},
-            max_tokens=32000,
+            anthropic_thinking={"type": "enabled", "budget_tokens": 10000},
+            max_tokens=20000,
         ),
         instructions=_INSTRUCTIONS,
     )
@@ -79,13 +80,12 @@ def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRuleDraft]]:
     ) -> list[SymbolicRuleDraft]:
         for rule in result:
             try:
-                logic_tree = LogicNode.model_validate(rule.logic_tree)
+                logic_tree = LogicNode.model_validate(json.loads(rule.logic_tree))
             except Exception as e:
                 raise ModelRetry(
-                    f"Invalid logic_tree for rule '{rule.rule_id}': {e}. "
-                    "Return a valid LogicNode with logic_type and children."
+                    f"Invalid logic_tree JSON for rule '{rule.rule_id}': {e}. "
+                    "Return logic_tree as a valid JSON string for a LogicNode object."
                 )
-
             sql_where = compile_ast_to_sql(logic_tree)
             test_sql = f"SELECT id FROM {rule.target_table} WHERE {sql_where} LIMIT 1"
 
@@ -93,8 +93,7 @@ def get_extractor_agent() -> Agent[ExtractorDeps, list[SymbolicRuleDraft]]:
                 async with ctx.deps.db.begin_nested():
                     await ctx.deps.db.execute(text(f"EXPLAIN {test_sql}"))
                 rule.compiled_sql = (
-                    f"SELECT id, data_payload FROM {rule.target_table} "
-                    f"WHERE {sql_where}"
+                    f"SELECT * FROM {rule.target_table} WHERE {sql_where}"
                 )
             except DBAPIError as e:
                 raise ModelRetry(
