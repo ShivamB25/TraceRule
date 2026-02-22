@@ -5,6 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.config import settings
 from app.database import async_session_factory, engine
@@ -24,6 +25,7 @@ async def scheduled_scan() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
 
     scheduler = AsyncIOScheduler(timezone="UTC")
@@ -45,7 +47,7 @@ async def lifespan(app: FastAPI):
     logger.info("Shutdown complete")
 
 
-app = FastAPI(title="TraceRule", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="TraceRule", version="3.0.0", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -66,3 +68,7 @@ from app.routes import policies, rules, violations
 app.include_router(policies.router, prefix="/api/v1")
 app.include_router(rules.router, prefix="/api/v1")
 app.include_router(violations.router, prefix="/api/v1")
+
+from app.api import router as v3_router
+
+app.include_router(v3_router.router, prefix="/api/v3")

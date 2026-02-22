@@ -7,11 +7,23 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.compiler import CompilerDeps, get_compiler_agent
-from app.models import Policy, Rule
+from app.agents.extractor import ExtractorDeps, get_extractor_agent
+from app.models import Policy, Rule, V3Rule
+from app.config import settings
+from app.schemas import GlobalOntology
 
 logger = logging.getLogger(__name__)
 
-_INTERNAL_TABLES = frozenset({"policies", "rules", "violations"})
+_INTERNAL_TABLES = frozenset(
+    {
+        "policies",
+        "rules",
+        "violations",
+        "company_records",
+        "v3_rules",
+        "v3_violations",
+    }
+)
 
 
 def _extract_pdf_text(file_bytes: bytes) -> str:
@@ -82,6 +94,11 @@ async def _introspect_db_schema(db: AsyncSession) -> str:
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# V1 ingestion (existing — unchanged)
+# ---------------------------------------------------------------------------
+
+
 async def ingest_policy(
     db: AsyncSession,
     file_bytes: bytes,
@@ -143,6 +160,131 @@ async def ingest_policy(
         policy.status = "completed"
     except Exception as e:
         logger.error("Compilation failed for policy %d: %s", policy_id, e)
+        policy.status = "failed"
+
+    await db.commit()
+    return policy_id
+
+
+# ---------------------------------------------------------------------------
+# V3 ingestion — Global Lexicon + AST extraction
+# ---------------------------------------------------------------------------
+
+
+_LEXICON_INSTRUCTIONS = (
+    "You are a legal terminology analyst. "
+    "Extract a glossary of ALL acronyms, role names, legal terms, and domain jargon "
+    "from the following policy document. "
+    "Return a JSON object where keys are the term/acronym and values are their "
+    "plain-English definitions as used in this specific policy."
+)
+
+
+def _chunk_policy_text(
+    full_text: str, chunk_size: int = 4000, overlap: int = 500
+) -> list[str]:
+    if len(full_text) <= chunk_size:
+        return [full_text]
+
+    chunks: list[str] = []
+    start = 0
+    while start < len(full_text):
+        end = start + chunk_size
+        chunk = full_text[start:end]
+        chunks.append(chunk)
+        start = end - overlap
+
+    return chunks
+
+
+async def _extract_global_ontology(full_text: str) -> GlobalOntology:
+    from pydantic_ai import Agent
+    from pydantic_ai.models.anthropic import AnthropicModel, AnthropicModelSettings
+    from pydantic_ai.providers.anthropic import AnthropicProvider
+
+    model = AnthropicModel(
+        "claude-sonnet-4-6",
+        provider=AnthropicProvider(api_key=settings.anthropic_api_key),
+    )
+    lexicon_agent: Agent[None, GlobalOntology] = Agent(
+        model,
+        output_type=GlobalOntology,
+        model_settings=AnthropicModelSettings(
+            anthropic_thinking={"type": "enabled", "budget_tokens": 4000},
+        ),
+        instructions=_LEXICON_INSTRUCTIONS,
+    )
+    result = await lexicon_agent.run(full_text[:12000])
+    return result.output
+
+
+async def ingest_policy_v3(
+    db: AsyncSession,
+    file_bytes: bytes,
+    filename: str,
+    policy_id: int,
+) -> int:
+    result = await db.execute(select(Policy).where(Policy.id == policy_id))
+    policy = result.scalar_one_or_none()
+    if policy is None:
+        logger.error("Policy %d not found for V3 ingestion", policy_id)
+        return policy_id
+
+    policy.status = "processing"
+
+    try:
+        markdown_text = _extract_policy_text(file_bytes, filename)
+    except Exception as e:
+        logger.error("V3 text extraction failed for policy %d: %s", policy_id, e)
+        policy.status = "failed"
+        await db.commit()
+        return policy_id
+
+    policy.markdown_text = markdown_text
+
+    try:
+        global_ontology = await _extract_global_ontology(markdown_text)
+        schema_context = await _introspect_db_schema(db)
+
+        deps = ExtractorDeps(
+            db=db,
+            db_schema_context=schema_context,
+            global_ontology=global_ontology,
+        )
+
+        chunks = _chunk_policy_text(markdown_text)
+        all_rules: list[V3Rule] = []
+
+        for i, chunk in enumerate(chunks):
+            prompt = f"[Chunk {i + 1}/{len(chunks)}]\n\n{chunk}"
+            try:
+                extraction = await get_extractor_agent().run(prompt, deps=deps)
+                for symbolic_rule in extraction.output:
+                    v3_rule = V3Rule(
+                        policy_id=policy_id,
+                        rule_id=symbolic_rule.rule_id,
+                        title=symbolic_rule.title,
+                        source_quote=symbolic_rule.source_quote,
+                        severity=symbolic_rule.severity,
+                        target_table=symbolic_rule.target_table,
+                        logic_tree_json=symbolic_rule.logic_tree.model_dump(),
+                        requires_semantic_scan=symbolic_rule.requires_semantic_scan,
+                        compiled_sql=symbolic_rule.compiled_sql,
+                        status="pending_review",
+                    )
+                    db.add(v3_rule)
+                    all_rules.append(v3_rule)
+            except Exception as e:
+                logger.error(
+                    "V3 extraction failed for policy %d chunk %d: %s",
+                    policy_id,
+                    i,
+                    e,
+                )
+
+        policy.status = "completed" if all_rules else "failed"
+    except Exception as e:
+        logger.error("V3 ingestion failed for policy %d: %s", policy_id, e)
         policy.status = "failed"
 
     await db.commit()

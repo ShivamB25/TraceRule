@@ -1,14 +1,22 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, func
-from sqlalchemy.types import TypeDecorator
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.types import JSON
+from sqlalchemy import ForeignKey, Index, Text, func
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.types import JSON, TypeDecorator
+
+from pgvector.sqlalchemy import Vector
+
+
+# ---------------------------------------------------------------------------
+# Type helpers
+# ---------------------------------------------------------------------------
 
 
 class JSONVariant(TypeDecorator):
+    """JSONB on Postgres, plain JSON elsewhere (SQLite tests)."""
+
     impl = JSON
     cache_ok = True
 
@@ -18,8 +26,46 @@ class JSONVariant(TypeDecorator):
         return dialect.type_descriptor(JSON())
 
 
+class VectorVariant(TypeDecorator):
+    """pgvector Vector on Postgres, plain Text elsewhere (SQLite tests)."""
+
+    impl = Text
+    cache_ok = True
+
+    def __init__(self, dim: int = 1536):
+        super().__init__()
+        self.dim = dim
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(Vector(self.dim))
+        return dialect.type_descriptor(Text())
+
+
+class TSVectorVariant(TypeDecorator):
+    """TSVECTOR on Postgres, plain Text elsewhere (SQLite tests)."""
+
+    impl = Text
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(TSVECTOR())
+        return dialect.type_descriptor(Text())
+
+
+# ---------------------------------------------------------------------------
+# Base
+# ---------------------------------------------------------------------------
+
+
 class Base(AsyncAttrs, DeclarativeBase):
     pass
+
+
+# ---------------------------------------------------------------------------
+# V1 models (existing — do not remove)
+# ---------------------------------------------------------------------------
 
 
 class Policy(Base):
@@ -56,3 +102,85 @@ class Violation(Base):
     ai_explanation: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="open")
     detected_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# V3 models — Neuro-Symbolic Compliance Engine
+# ---------------------------------------------------------------------------
+
+
+class CompanyRecord(Base):
+    """Universal record store with hybrid search columns.
+
+    Every business table row is flattened into this table so the scanner
+    can query it uniformly via deterministic SQL, pgvector cosine search,
+    and Postgres full-text BM25 ranking.
+    """
+
+    __tablename__ = "company_records"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    table_name: Mapped[str] = mapped_column(
+        index=True, comment="Logical source table (e.g. 'expenses', 'employees')"
+    )
+    data_payload: Mapped[dict] = mapped_column(JSONVariant)
+    search_text: Mapped[str] = mapped_column(
+        Text, comment="Concatenated text for BM25 full-text search"
+    )
+    embedding: Mapped[list] = mapped_column(
+        VectorVariant(1536), nullable=True, comment="OpenAI / Anthropic embedding"
+    )
+    ts_vector: Mapped[str] = mapped_column(
+        TSVectorVariant(), nullable=True, comment="Postgres tsvector for ts_rank"
+    )
+
+    __table_args__ = (
+        Index("ix_records_search_vector", "ts_vector", postgresql_using="gin"),
+        Index("ix_records_table_name", "table_name"),
+    )
+
+
+class V3Rule(Base):
+    """A single compliance rule expressed as a deontic logic AST."""
+
+    __tablename__ = "v3_rules"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    policy_id: Mapped[int] = mapped_column(ForeignKey("policies.id"))
+    rule_id: Mapped[str] = mapped_column(
+        unique=True, comment="Stable identifier from extractor (e.g. 'AML-3.2')"
+    )
+    title: Mapped[str]
+    source_quote: Mapped[str]
+    severity: Mapped[str] = mapped_column(default="MEDIUM")
+    target_table: Mapped[str]
+    logic_tree_json: Mapped[dict] = mapped_column(
+        JSONVariant, comment="Serialised LogicNode"
+    )
+    requires_semantic_scan: Mapped[bool] = mapped_column(default=False)
+    compiled_sql: Mapped[str | None]
+    status: Mapped[str] = mapped_column(default="pending_review")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+class V3Violation(Base):
+    """Violation detected by V3 scanner (deterministic or semantic)."""
+
+    __tablename__ = "v3_violations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    v3_rule_id: Mapped[int] = mapped_column(ForeignKey("v3_rules.id"))
+    record_id: Mapped[int] = mapped_column(ForeignKey("company_records.id"))
+    violation_data: Mapped[dict] = mapped_column(JSONVariant)
+    verdict_reasoning: Mapped[str | None] = mapped_column(
+        comment="Chief Justice reasoning for semantic violations"
+    )
+    confidence_score: Mapped[float | None] = mapped_column(
+        comment="0.0-1.0 confidence from courtroom verdict"
+    )
+    status: Mapped[str] = mapped_column(default="open")
+    detected_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    __table_args__ = (
+        Index("ix_v3_violations_dedup", "v3_rule_id", "record_id", unique=True),
+    )
