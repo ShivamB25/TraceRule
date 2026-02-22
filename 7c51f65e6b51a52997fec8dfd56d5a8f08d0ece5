@@ -1,0 +1,62 @@
+docs/ARCHITECTURE_RESEARCH.md
+  86ec9b85c9888691 1,7,13,15,19-56,65-68,71,77,81-87,89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "7c51f65e6b51a52997fec8dfd56d5a8f08d0ece5",
+  "prompts": {
+    "1a4bf5a4ba61410f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37ed9abc8ffei5UoTiHbM8MsCA-a632875c-3cdd-4da7-97b3-0ee0b318afec",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 328,
+      "overriden_lines": 0
+    },
+    "7010926f319184a9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37ed9abc8ffei5UoTiHbM8MsCA-981f0dbd-b27e-436e-827b-edcc2c61b24c",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 577,
+      "overriden_lines": 0
+    },
+    "86ec9b85c9888691": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37d71b18dffe8L5YePH5HjWgd2-7523e928-d3c3-4d2a-9af5-a0076cbebfd8",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 57,
+      "total_deletions": 7,
+      "accepted_lines": 57,
+      "overriden_lines": 0
+    },
+    "a560e94051a13b38": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "opencode-transcript-ses_37ed9abc8ffei5UoTiHbM8MsCA-79522afb-85a1-4aa5-a81a-981209fc5642",
+        "model": "unknown"
+      },
+      "human_author": "shivam bansal <shivamban30@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 647,
+      "overriden_lines": 0
+    }
+  }
+}
